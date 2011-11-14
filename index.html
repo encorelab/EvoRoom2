@@ -1,0 +1,26 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+    <title>EvoRoom</title> 
+  
+    <link href="css/evoroom.css" rel="stylesheet" type="text/css" /> 
+    <link href="js/sail.js/css/sail.css" rel="stylesheet" type="text/css" />
+    <link href="js/sail.js/css/jquery-ui/start/jquery-ui.css" rel="stylesheet" type="text/css" />
+
+    <script src="js/sail.js/sail.js"></script>
+    <script>
+        Sail.load()
+            .then('js/sail.js/rollcall.js')
+            .then('js/evoroom.js')
+            .thenRun(function() { 
+                return Sail.init(EvoRoom) ;
+            });
+    </script>
+</head>
+<body>
+    <header>
+        <h1>EvoRoom</h1>
+    </header>
+
+</body>
+</html>
