@@ -3,17 +3,17 @@
 <head> 
     <title>EvoRoom</title> 
   
-    <link href="css/evoroom.css" rel="stylesheet" type="text/css" /> 
     <link href="js/sail.js/css/sail.css" rel="stylesheet" type="text/css" />
     <link href="js/sail.js/css/jquery-ui/start/jquery-ui.css" rel="stylesheet" type="text/css" />
-
+    <link href="css/evoroom.css" rel="stylesheet" type="text/css" /> 
+    
     <script src="js/sail.js/sail.js"></script>
     <script>
         Sail.load()
             .then('js/sail.js/rollcall.js')
             .then('js/evoroom.js')
             .thenRun(function() { 
-                return Sail.init(EvoRoom) ;
+                return Sail.init(EvoRoom);
             });
     </script>
 </head>
@@ -21,6 +21,28 @@
     <header>
         <h1>EvoRoom</h1>
     </header>
+
+	<div id="evoroom">
+	
+		<div id="log-in-success" class="full-text-box">
+			<div><b>Log in successful</b></div>
+			<button class="big-button"><b>Initialize scanner</b></button>
+		</div>
+	
+ 		<div id="survey-welcome" class="full-text-box">
+			<div><b>Welcome to the simulation lab</b></div>
+			<button class="big-button"><b>Initialize scanner</b></button>
+		</div>
+	
+		<div id="survey-organisms" class="full-text-box">
+			<div><b>Location: </b></div>
+			<button class="big-button"><b>Initialize scanner</b></button>
+			<button class="small-button"><b>Next</b></button>
+		</div>
+	
+	
+	</div>
+
 
 </body>
 </html>
