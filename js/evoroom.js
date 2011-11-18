@@ -1,4 +1,4 @@
-/*jslint devel: true, regexp: true, browser: true, unparam: true, debug: true, sloppy: true, sub: true, es5: true, vars: true, evil: true, fragment: true, white: false */
+/*jslint devel: true, regexp: true, browser: true, unparam: true, debug: true, sloppy: true, sub: true, es5: true, vars: true, evil: true, fragment: true, white: true */
 /*globals Sail, Rollcall, $, Foo */
 
 var EvoRoom = {
@@ -11,9 +11,11 @@ var EvoRoom = {
         
         initialized: function(ev) {
             Sail.app.authenticate();
+            Sail.app.setupPageLayout();
         },
         
         connected: function(ev) {
+            
         },
         
         authenticated: function(ev) {
@@ -49,7 +51,7 @@ var EvoRoom = {
                 $(Sail.app).trigger('initialized');
                 return true;
             });
-    },
+    },    
     
     authenticate: function() {
         Sail.app.token = Sail.app.rollcall.getCurrentToken();
@@ -70,7 +72,34 @@ var EvoRoom = {
                 }
             );
         }
+    },
+    
+    setupPageLayout: function() {
+        $('#survey-welcome').hide();
+        $('#survey-organisms').hide();          
+        $('#survey-organisms .small-button').hide();
+        
+        
+        $('#log-in-success .big-button').click(function() {
+            $('#log-in-success').hide();
+            $('#survey-welcome').show();
+            // trigger the QR scan screen/module, but what is this scan for? 
+        });
+        
+        $('#survey-welcome .big-button').click(function() {
+            $('#survey-welcome').hide();
+            $('#survey-organisms').show();        	
+        	// register the rainforest location, set (in a var? or pass it?)
+        });
+
+        $('#survey-organisms .big-button').click(function() {
+        	// perform QR scan
+        });
+
+        // $('#survey-organisms .small-button').show(); when all rainforests are completeds
+        $('#survey-organisms .small-button').click(function() {
+        	// go to next screen
+        });
     }
     
-
 };
