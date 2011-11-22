@@ -10,8 +10,10 @@ var EvoRoom = {
         },
         
         initialized: function(ev) {
-            Sail.app.authenticate();
+            $('.jquery-radios').buttonset();
+        	Sail.app.authenticate();
             Sail.app.setupPageLayout();
+
         },
         
         connected: function(ev) {
@@ -76,13 +78,14 @@ var EvoRoom = {
     
     setupPageLayout: function() {
         $('#survey-welcome').hide();
+        $('#student-chosen-animals').hide();
         $('#survey-organisms').hide();          
-        $('#survey-organisms .small-button').hide();
-        
+        $('#survey-organisms .small-button').hide();        
         
         $('#log-in-success .big-button').click(function() {
             $('#log-in-success').hide();
             $('#survey-welcome').show();
+            $('#student-chosen-animals').show();
             // trigger the QR scan screen/module, but what is this scan for? 
         });
         
@@ -90,15 +93,28 @@ var EvoRoom = {
             $('#survey-welcome').hide();
             $('#survey-organisms').show();        	
         	// register the rainforest location, set (in a var? or pass it?)
+            
+            // clear radio buttons
+	        $("input:radio").prop('checked', false)
+	        $('#survey-organisms .radio').button('refresh')
         });
 
         $('#survey-organisms .big-button').click(function() {
         	// perform QR scan
+        	
+        	// clear radio buttons
+	        $("input:radio").prop('checked', false)
+	        $('#survey-organisms .radio').button('refresh')
+	        
+	        // when all but 1 rainforest is completed show, this belongs in a different function
+	        $('#survey-organisms .small-button').show();
+	        $('#survey-organisms .big-button').hide();            
         });
-
-        // $('#survey-organisms .small-button').show(); when all rainforests are completeds
+        
         $('#survey-organisms .small-button').click(function() {
-        	// go to next screen
+        	$('#survey-organisms').hide();
+        	$('#student-chosen-animals').hide();
+        	// show next screen
         });
     }
     
