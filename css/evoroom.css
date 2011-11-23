@@ -141,13 +141,42 @@
 #speed-date-intro .links {
 	margin-top: 100px;
 	text-align: center;
-	/*
-		style buttons as links here
-	*/
+	text-decoration: underline;
+	color: #00A99D;
 }
 
 
+#final-picks-ranking .final-picks-content-table {
+	margin-left: auto;
+	margin-right: auto;	
+	margin-top: 30px;	
+	border: 1px solid black;
+	border-collapse: collapse;
+	text-align: center;	
+}
 
+#final-picks-ranking .final-picks-content-table th {
+	width: 240px;
+	border-left: 1px solid black;
+	border-bottom: 1px solid black;
+	padding: 10px 0px;
+}
+
+#final-picks-ranking .final-picks-content-table td {
+	height: 90px;
+	border-left: 1px solid black;
+}
+
+#final-picks-ranking .dropdown {
+	height: 50px;
+	width: 100px;
+	font-size: 24px;
+}
+
+#final-picks-ranking .final-picks-done-text {
+	margin-top: 60px;
+	text-align: center;
+}
 
 
 

@@ -87,6 +87,7 @@ var EvoRoom = {
         $('#rotation-prediction').hide();
         $('#rotation-next-rainforest').hide();
         $('#speed-date-intro').hide();
+        $('#final-picks-ranking').hide();
 
 
         $('#log-in-success .big-button').click(function() {
@@ -154,8 +155,15 @@ var EvoRoom = {
             $('#speed-date-intro').show();
             // else {
             // something else
-            });
-
-        }
+        });
+        
+        $('#speed-date-intro .first-date').click(function() {            
+            $('#speed-date-intro').hide();
+            // does Michelle want both of these links to just lead to next page?
+            
+            // TEMP
+            $('#final-picks-ranking').show();
+        });
+    }
 
 };
