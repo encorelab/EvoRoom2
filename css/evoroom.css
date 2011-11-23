@@ -1,0 +1,39 @@
+#evoroom {
+	background-image: url('/images/bkgd_evoroom.png');
+	background-repeat: no-repeat;
+	width: 800px;
+	height: 1200px;
+	font-size: 24px;
+}
+
+.full-text-box {
+	width: 480px;
+	height: 740px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 410px;
+	display: table;
+	background-color: white;
+	padding: 25px;
+}
+
+.big-button {
+	width: 340px;
+	height: 60px;
+	margin-left: 100px;
+	margin-top: 640px;
+	font-size: 28px;
+	background: url('');
+	background-color: #007ADF;
+	border: 1px solid #007ADF;
+}
+
+.small-button {
+	width: 120px;
+	height: 60px;
+	margin-top: 640px;
+	font-size: 28px;
+	background: url('');
+	background-color: #007ADF;
+	border: 1px solid #007ADF;	
+}
