@@ -1,39 +1,153 @@
+* {
+ font-family: inherit;  /* we can get rid of this after pulling in Matt's new stuff */
+}
+
 #evoroom {
 	background-image: url('/images/bkgd_evoroom.png');
 	background-repeat: no-repeat;
 	width: 800px;
 	height: 1200px;
 	font-size: 24px;
+	position: relative;
+	font-family: 'Droid Sans', sans-serif;
 }
 
 .full-text-box {
-	width: 480px;
-	height: 740px;
-	margin-left: auto;
-	margin-right: auto;
-	margin-top: 410px;
+	position: absolute;
+	bottom: 0px;
+	left: 50%;			
+	margin-left: -260px;				/* always width/2 */
+	width: 520px;
+	height: 790px;
 	display: table;
-	background-color: white;
-	padding: 25px;
+	background-color: #F7F7F7;
+	padding: 35px;
+}
+
+.title {
+	margin-top: 15px;
 }
 
 .big-button {
+	position: absolute;
+	bottom: 80px;
+	left: 50%;
+	margin-left: -170px;	
 	width: 340px;
 	height: 60px;
-	margin-left: 100px;
-	margin-top: 640px;
 	font-size: 28px;
-	background: url('');
-	background-color: #007ADF;
-	border: 1px solid #007ADF;
-}
-
-.small-button {
-	width: 120px;
-	height: 60px;
-	margin-top: 640px;
-	font-size: 28px;
+	color: white;
 	background: url('');
 	background-color: #007ADF;
 	border: 1px solid #007ADF;	
 }
+
+.small-button {
+	position: absolute;
+	bottom: 80px;
+	left: 50%;
+	margin-left: -70px;
+	width: 140px;
+	height: 60px;
+	font-size: 28px;
+	color: white;
+	background: url('');
+	background-color: #007ADF;
+	border: 1px solid #007ADF;	
+}
+
+.orange {
+	color: #FB983B;
+}
+
+/******************************TO BE MOVED?****************************/
+
+#student-chosen-animals {
+	position: absolute;
+	top: 20px;
+	right: 20px;
+}
+
+#student-chosen-animals .animal-image {
+	height: 200px;
+	width: 200px;
+}
+
+
+#survey-organisms .survey-content-box {
+	margin-top: 20px;
+	text-align: center;
+}
+
+#survey-organisms .survey-content-table {
+	margin-left: auto;
+	margin-right: auto;	
+	margin-top: 30px;	
+	border: 1px solid black;
+	border-collapse: collapse;
+	text-align: center;	
+}
+
+#survey-organisms .survey-content-table th {
+	width: 260px;
+	border-left: 1px solid black;
+	border-bottom: 1px solid black;
+	padding: 10px 0px;
+}
+
+#survey-organisms .survey-content-table td {
+	height: 100px;
+	border-left: 1px solid black;
+}
+
+#survey-organisms .survey-done-text {
+	margin-top: 170px;
+	text-align: center;
+}
+
+
+#rotation-note-taker .rainforest-choice {
+	margin-top: 50px;
+}
+
+#rotation-note-taker .rainforest-choice-radios {
+	margin-top: 20px;
+	text-align: center;
+}
+
+#rotation-note-taker .rainforest-explanation {
+	margin-top: 25px;
+}
+
+#rotation-note-taker .rainforest-explanation-text-entry {
+	margin-top: 5px;
+	width: 440px;
+	height: 168px;
+	font-size: 24px;
+}
+
+.rotation-link {
+	margin-top: 80px;
+	color: #00A99D;
+	text-align: center;
+}
+
+.rotation-done-text {
+	margin-top: 220px;
+	text-align: center;
+}
+
+
+#speed-date-intro .links {
+	margin-top: 100px;
+	text-align: center;
+	/*
+		style buttons as links here
+	*/
+}
+
+
+
+
+
+
