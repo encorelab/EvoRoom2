@@ -36,24 +36,29 @@
 	width: 340px;
 	height: 60px;
 	font-size: 28px;
+	color: white;
 	background: url('');
 	background-color: #007ADF;
-	border: 1px solid #007ADF;
+	border: 1px solid #007ADF;	
 }
 
 .small-button {
 	position: absolute;
 	bottom: 80px;
 	left: 50%;
-	margin-left: 60px;
-	width: 120px;
+	margin-left: -70px;
+	width: 140px;
 	height: 60px;
 	font-size: 28px;
+	color: white;
 	background: url('');
 	background-color: #007ADF;
 	border: 1px solid #007ADF;	
 }
 
+.orange {
+	color: #FB983B;
+}
 
 /******************************TO BE MOVED?****************************/
 
@@ -101,6 +106,45 @@
 }
 
 
+#rotation-note-taker .rainforest-choice {
+	margin-top: 50px;
+}
+
+#rotation-note-taker .rainforest-choice-radios {
+	margin-top: 20px;
+	text-align: center;
+}
+
+#rotation-note-taker .rainforest-explanation {
+	margin-top: 25px;
+}
+
+#rotation-note-taker .rainforest-explanation-text-entry {
+	margin-top: 5px;
+	width: 440px;
+	height: 168px;
+	font-size: 24px;
+}
+
+.rotation-link {
+	margin-top: 80px;
+	color: #00A99D;
+	text-align: center;
+}
+
+.rotation-done-text {
+	margin-top: 220px;
+	text-align: center;
+}
+
+
+#speed-date-intro .links {
+	margin-top: 100px;
+	text-align: center;
+	/*
+		style buttons as links here
+	*/
+}
 
 
 

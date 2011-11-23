@@ -23,7 +23,10 @@
         <h1>EvoRoom</h1>
     </header>
 
-	<div id="evoroom">		
+	<div id="evoroom">
+	
+<!-- ***********************************************SURVEY**************************************************** -->
+		
 		<div id="student-chosen-animals">
 			<!-- remove src and needs to be dynamically, in JS, just not sure where yet (after authenticate?) -->
 			<img class="first-animal animal-image" src="/images/sumatran_orangutan_icon.png">		
@@ -77,7 +80,7 @@
 						<td class="first-organism">
 							ORG1 from QR
 						</td>
-						<td class="first-organism-buttons jquery-radios">
+						<td class="first-organism-radios jquery-radios">
 							<input type="radio" name="first-organism" id="first-org-yes" class="radio" value="yes" /><label for="first-org-yes">Yes</label>
 							<input type="radio" name="first-organism" id="first-org-no" class="radio" value="no" /><label for="first-org-no">No</label>							
 						</td>
@@ -86,7 +89,7 @@
 						<td class="second-organism">
 							ORG2 from QR
 						</td>
-						<td class="second-organism-buttons jquery-radios">
+						<td class="second-organism-radios jquery-radios">
 							<input type="radio" name="second-organism" id="second-org-yes" class="radio" value="yes" /><label for="second-org-yes">Yes</label>
 							<input type="radio" name="second-organism" id="second-org-no" class="radio" value="no" /><label for="second-org-no">No</label>							
 						</td>
@@ -99,7 +102,108 @@
 			<button class="big-button"><b>Initialize scanner</b></button>
 			<button class="small-button"><b>Next</b></button>
 		</div>
-	
+
+		
+<!-- *********************************************ROTATION******************************************************* -->		
+		
+		<div id="rotation-intro" class="full-text-box">
+			<div class="title"><b>Step 1 complete</b></div>
+			<br>
+			<div>
+				One of these rainforests display the results from an environmental variable you and your group
+				members chose to analyze for a report. Your challenge is to eliminate the rainforests that most
+				likely did NOT result from your variable.
+				<br><br>
+				Gather your group members and go to <span class="current-rainforest orange">Temp rainforest lorum</span>.
+				When you have all arrived, perform a QR scan. 
+			</div>
+			<button class="big-button"><b>Initialize scanner</b></button>
+		</div>
+
+		<div id="rotation-note-taker" class="full-text-box">
+			<div class="title"><b>Location: </b><span class="current-rainforest">Temp rainforest lorum</span></div>
+			<br>
+			<div>
+				Instructions: Your assignment at this location is to be the note-taker. Discuss the
+				following questions with your group members and record your answers below.
+			</div>
+			<div class="rainforest-choice">
+				Could this be your rainforest?
+				<div class="rainforest-choice-radios jquery-radios">
+					<input type="radio" name="second-organism" id="rainforest-choice-yes" class="radio" value="yes" /><label for="rainforest-choice-yes">Yes</label>
+					<input type="radio" name="second-organism" id="rainforest-choice-no" class="radio" value="no" /><label for="rainforest-choice-no">No</label>							
+				</div>				
+			</div>
+			<div class="rainforest-explanation">
+				Give a brief explanation for your answer.
+				<textarea class="rainforest-explanation-text-entry"></textarea>
+			</div>
+			<button class="small-button"><b>Done</b></button>
+		</div>
+		
+		<div id="rotation-field-guide" class="full-text-box">
+			<div class="title"><b>Location: </b><span class="current-rainforest">Temp rainforest lorum</span></div>
+			<br>
+			<div>
+				<b>Instructions:</b> Your assignment at this location is to look up information in your field guide.
+				Follow the link below to go to the field guide site.
+			</div>
+			<div class="rotation-link">
+				<!-- the link will need to be dynamic to Drupal site, based on the group via rollcall -->
+				<a class="rotation-link" href="http://google.ca">Go to the <b>Field Guide</b></a>
+			</div>		
+			<div class="rotation-done-text">
+				Ready to move on to the next station or step? Click done.
+			</div>
+			<button class="small-button"><b>Done</b></button>
+		</div>
+		
+		<div id="rotation-prediction" class="full-text-box">
+			<div class="title"><b>Location: </b><span class="current-rainforest">Temp rainforest lorum</span></div>
+			<br>
+			<div>
+				<b>Instructions:</b> Your assignment at this location is to look up your prediction.
+				Follow the link below to go to your group's page.
+			</div>
+			<div class="rotation-link">
+				<!-- the link will need to be dynamic to Drupal site, based on the group via rollcall -->			
+				<a class="rotation-link" href="http://yahoo.ca">Go to your <b>Group's Page</b></a>
+			</div>
+			<div class="rotation-done-text">
+				Ready to move on to the next station or step? Click done.
+			</div>
+			<button class="small-button"><b>Done</b></button>
+		</div>
+
+		<div id="rotation-next-rainforest" class="full-text-box">
+			<div class="title"><b>Step 2 in progress</b></div>
+			<br>
+			<div>
+				Go to <span class="next-rainforest .orange"><b>Next rainforest lorum</b></span>.
+				When you have all arrived, perform a QR scan.
+			</div>
+			<button class="big-button"><b>Initialize scanner</b></button>
+		</div>		
+
+
+<!-- *********************************************SPEED DATING**************************************************** -->
+
+		<div id="speed-date-intro" class="full-text-box">
+			<div class="title"><b>Step 2 complete</b></div>
+			<br>
+			<div>
+				Your next task is to locate these reserachers (see below) and find out more information about THEIR rainforests.
+				After all, how will you know which rainforest is yours if you don't know how the other rainforests came to be?
+				Maybe you can offer your expertise to help them find their rainforests as well. When you are ready, click on
+				their names to begin.
+			</div>	
+			<div class="links">
+				<button class="link-button first-date">TEMP 1st DATE</button>
+				<br><br><br>
+				<button class="link-button second-date">TEMP 2nd DATE</button>
+			</div>	
+		</div>
+			
 	</div>
 
 
