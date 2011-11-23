@@ -10,8 +10,8 @@ var EvoRoom = {
         },
 
         initialized: function(ev) {
+			Sail.app.hidePageElements();
             Sail.app.authenticate();
-            Sail.app.setupPageLayout();
         },
 
         connected: function(ev) {
@@ -19,6 +19,7 @@ var EvoRoom = {
         },
 
         authenticated: function(ev) {
+            Sail.app.setupPageLayout();
         },
 
         unauthenticated: function(ev) {
@@ -31,7 +32,7 @@ var EvoRoom = {
 
         Sail.app.run = Sail.app.run || JSON.parse($.cookie('run'));
         if (Sail.app.run) {
-            Sail.app.groupchatRoom = Sail.app.run.name+'@conference.'+Sail.app.xmppDomain;
+            Sail.app.groupchatRoom = Sail.app.run.name + '@conference.' + Sail.app.xmppDomain;
         }
 
         Sail.modules
@@ -73,6 +74,19 @@ var EvoRoom = {
             );
         }
     },
+
+	hidePageElements: function() {
+		$('#survey-welcome').hide();
+        $('#student-chosen-animals').hide();
+        $('#survey-organisms').hide();
+        $('#survey-organisms .small-button').hide();
+        $('#rotation-intro').hide();
+        $('#rotation-note-taker').hide();
+        $('#rotation-field-guide').hide();
+        $('#rotation-prediction').hide();
+        $('#rotation-next-rainforest').hide();
+        $('#speed-date-intro').hide();
+	},
 
     setupPageLayout: function() {
         $('.jquery-radios').buttonset();
