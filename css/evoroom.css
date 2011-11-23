@@ -18,7 +18,7 @@
 	left: 50%;			
 	margin-left: -260px;				/* always width/2 */
 	width: 520px;
-	height: 790px;
+	height: 780px;
 	display: table;
 	background-color: #F7F7F7;
 	padding: 35px;
@@ -60,7 +60,7 @@
 	color: #FB983B;
 }
 
-/******************************TO BE MOVED?****************************/
+/*************************************TO BE MOVED?****************************************/
 
 #student-chosen-animals {
 	position: absolute;
@@ -105,6 +105,7 @@
 	text-align: center;
 }
 
+/*************************************TO BE MOVED?****************************************/
 
 #rotation-note-taker .rainforest-choice {
 	margin-top: 50px;
@@ -137,6 +138,7 @@
 	text-align: center;
 }
 
+/*************************************TO BE MOVED?****************************************/
 
 #speed-date-intro .links {
 	margin-top: 100px;
@@ -145,6 +147,7 @@
 	color: #00A99D;
 }
 
+/*************************************TO BE MOVED?****************************************/
 
 #final-picks-ranking .final-picks-content-table {
 	margin-left: auto;
@@ -170,7 +173,7 @@
 #final-picks-ranking .dropdown {
 	height: 50px;
 	width: 100px;
-	font-size: 24px;
+	font-size: 42px;
 }
 
 #final-picks-ranking .final-picks-done-text {
@@ -179,4 +182,13 @@
 }
 
 
+#final-picks-discuss .discussion-content-box {
+	margin-top: 60px;
+}
 
+#final-picks-discuss .discussion-content-text-entry {
+	margin-top: 5px;
+	width: 440px;
+	height: 284px;
+	font-size: 24px;
+}
