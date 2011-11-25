@@ -1,6 +1,10 @@
 /*jslint devel: true, regexp: true, browser: true, unparam: true, debug: true, sloppy: true, sub: true, es5: true, vars: true, evil: true, fragment: true, white: true */
 /*globals Sail, Rollcall, $, Foo */
 
+
+// hide scan button in 1-3 until yes/no completed
+// 'initialize scanner' is a bad name
+
 var EvoRoom = {
 	rollcallURL: '/rollcall',
 
