@@ -30,10 +30,10 @@
 	
 <!-- ***********************************************SURVEY**************************************************** -->
 		
-		<div id="student-chosen-animals">
+		<div id="student-chosen-organisms">
 			<!-- TODO remove src and needs to be dynamically, in JS, just not sure where yet (after authenticate?) -->
-			<img class="first-animal animal-image" src="/images/sumatran_orangutan_icon.png" alt="Sumatra Orangutan">		
-			<img class="second-animal animal-image" src="/images/sumatran_rhino_icon.png" alt="Sumatra Rhino">		
+			<img class="first-organism organism-image" src="/images/sumatran_orangutan_icon.png" alt="Sumatra Orangutan">		
+			<img class="second-organism organism-image" src="/images/sumatran_rhino_icon.png" alt="Sumatra Rhino">		
 		</div>
 			
 		<div id="log-in-success" class="full-text-box">
@@ -86,8 +86,8 @@
 							<!-- TODO -->
 						</td>
 						<td class="first-organism-radios jquery-radios">
-							<input type="radio" name="first-organism" id="first-org-yes" class="radio first-radios" value="yes" /><label for="first-org-yes">Yes</label>
-							<input type="radio" name="first-organism" id="first-org-no" class="radio first-radios" value="no" /><label for="first-org-no">No</label>							
+							<input type="radio" name="first-organism-yn" id="first-org-yes" class="radio first-radios" value="yes" /><label for="first-org-yes">Yes</label>
+							<input type="radio" name="first-organism-yn" id="first-org-no" class="radio first-radios" value="no" /><label for="first-org-no">No</label>							
 						</td>
 					</tr>
 					<tr>
@@ -96,8 +96,8 @@
 							<!-- TODO -->
 						</td>
 						<td class="second-organism-radios jquery-radios">
-							<input type="radio" name="second-organism" id="second-org-yes" class="radio second-radios" value="yes" /><label for="second-org-yes">Yes</label>
-							<input type="radio" name="second-organism" id="second-org-no" class="radio second-radios" value="no" /><label for="second-org-no">No</label>							
+							<input type="radio" name="second-organism-yn" id="second-org-yes" class="radio second-radios" value="yes" /><label for="second-org-yes">Yes</label>
+							<input type="radio" name="second-organism-yn" id="second-org-no" class="radio second-radios" value="no" /><label for="second-org-no">No</label>							
 						</td>
 						<!-- when both radio buttons are pressed, show big button -->
 				</table>
@@ -141,8 +141,8 @@
 			<div class="rainforest-choice">
 				Could this be your rainforest?
 				<div class="rainforest-choice-radios jquery-radios">
-					<input type="radio" name="second-organism" id="rainforest-choice-yes" class="radio" value="yes" /><label for="rainforest-choice-yes">Yes</label>
-					<input type="radio" name="second-organism" id="rainforest-choice-no" class="radio" value="no" /><label for="rainforest-choice-no">No</label>							
+					<input type="radio" name="your-rainforest" id="rainforest-choice-yes" class="radio" value="yes" /><label for="rainforest-choice-yes">Yes</label>
+					<input type="radio" name="your-rainforest" id="rainforest-choice-no" class="radio" value="no" /><label for="rainforest-choice-no">No</label>							
 				</div>
 			</div>
 			<div class="rainforest-explanation">
@@ -385,14 +385,22 @@
 			<div>
 				<b>Instructions: </b>Discuss the following question with your group members and provide your answer below.
 			</div>
-			<div class="discussion-content-box">
-				<div class="discussion-content-question">SOME DYNAMIC CONTENT WITH AT LEAST TWO LINES AND FEWER CAPITAL LETTERS</div>
+			<div class="discussion-content-box question1">
+				<div value="strategy" class="discussion-content-question">What is your strategy in ranking the rainforests? Describe your process.</div>
 				<!-- Each student in a group gets one of the questions below, to be inserted above
 				(if there are only 2 group members leave out the last one)
 				What is your strategy in ranking the rainforests? Describe your process.
 				Identify at least 3 key pieces of evidence in making your choices.
 				What are some important information you gleaned from other groups.
 				 -->
+				<textarea class="discussion-content-text-entry"></textarea>
+			</div>
+			<div value="evidence" class="discussion-content-box question2">
+				<div class="discussion-content-question">Identify at least 3 key pieces of evidence in making your choices.</div>
+				<textarea class="discussion-content-text-entry"></textarea>
+			</div>
+			<div value="additional_info" class="discussion-content-box question3">
+				<div class="discussion-content-question">Identify key insights from your discussion with the other groups members that helped you make your final rankings.</div>
 				<textarea class="discussion-content-text-entry"></textarea>
 			</div>
 			<button class="small-button"><b>Done</b></button> 
