@@ -112,10 +112,10 @@ var EvoRoom = {
 	},
 
 	setupPageLayout: function() {
-		rainforestCounter = 0;		
-		dateChoice = null;
-		firstInterview = false;
-		secondInterview = false;
+		var rainforestCounter = 0;		
+		var dateChoice = null;
+		var firstInterview = false;
+		var secondInterview = false;
 		
 		$('.jquery-radios').buttonset();
 
@@ -282,7 +282,7 @@ var EvoRoom = {
 /********************************************* EVENTS *******************************************/
 
 	submitOrganismsPresent: function() {
-		sev = new Sail.Event('organism_present', {
+		var sev = new Sail.Event('organism_present', {
 			group_code:EvoRoom.currentGroupCode,
 			author:Sail.app.session.account.login,
 			rainforest:EvoRoom.currentRainforest,
@@ -299,7 +299,7 @@ var EvoRoom = {
 	},
 	
 	submitRainforestGuess: function() {
-		sev = new Sail.Event('rainforest_guess_submitted', {
+		var sev = new Sail.Event('rainforest_guess_submitted', {
 			group_code:EvoRoom.currentGroupCode,
 			author:Sail.app.session.account.login,
 			rainforest:EvoRoom.currentRainforest,
@@ -310,7 +310,7 @@ var EvoRoom = {
 	},
 	
 	submitInterview: function() {
-		sev = new Sail.Event('interview_submitted', {
+		var sev = new Sail.Event('interview_submitted', {
 			group_code:EvoRoom.currentGroupCode,
 			author:Sail.app.session.account.login,
 			variable:$('select.variable-dropdown').val(),
@@ -320,7 +320,7 @@ var EvoRoom = {
 	},
 	
 	submitRankings: function() {
-		sev = new Sail.Event('rankings_submitted', {
+		var sev = new Sail.Event('rankings_submitted', {
 			group_code:EvoRoom.currentGroupCode,
 			author:Sail.app.session.account.login,
 	        ranks:{
@@ -334,7 +334,7 @@ var EvoRoom = {
 	},
 	
 	submitRationale: function() {
-		sev = new Sail.Event('rationale_submitted', {
+		var sev = new Sail.Event('rationale_submitted', {
 			group_code:EvoRoom.currentGroupCode,
 			author:Sail.app.session.account.login,
 			question:$('#final-picks-discuss .discussion-content-question').attr('value'),
