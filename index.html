@@ -31,7 +31,7 @@
 <!-- ***********************************************SURVEY**************************************************** -->
 		
 		<div id="student-chosen-animals">
-			<!-- remove src and needs to be dynamically, in JS, just not sure where yet (after authenticate?) -->
+			<!-- TODO remove src and needs to be dynamically, in JS, just not sure where yet (after authenticate?) -->
 			<img class="first-animal animal-image" src="/images/sumatran_orangutan_icon.png" alt="Sumatra Orangutan">		
 			<img class="second-animal animal-image" src="/images/sumatran_rhino_icon.png" alt="Sumatra Rhino">		
 		</div>
@@ -70,7 +70,8 @@
 		<div id="survey-organisms" class="full-text-box">
 			<div class="title">
 				<span><b>Location: </b></span>
-				<span class="location"><b>FROM QR EVENT</b></span>
+				<span class="location"><b>TEMP FROM QR EVENT</b></span>
+				<!-- TODO -->
 			</div>
 			
 			<div class="survey-content-box">
@@ -82,30 +83,35 @@
 					<tr>
 						<td class="first-organism">
 							ORG1 from QR
+							<!-- TODO -->
 						</td>
 						<td class="first-organism-radios jquery-radios">
-							<input type="radio" name="first-organism" id="first-org-yes" class="radio" value="yes" /><label for="first-org-yes">Yes</label>
-							<input type="radio" name="first-organism" id="first-org-no" class="radio" value="no" /><label for="first-org-no">No</label>							
+							<input type="radio" name="first-organism" id="first-org-yes" class="radio first-radios" value="yes" /><label for="first-org-yes">Yes</label>
+							<input type="radio" name="first-organism" id="first-org-no" class="radio first-radios" value="no" /><label for="first-org-no">No</label>							
 						</td>
 					</tr>
 					<tr>
 						<td class="second-organism">
 							ORG2 from QR
+							<!-- TODO -->
 						</td>
 						<td class="second-organism-radios jquery-radios">
-							<input type="radio" name="second-organism" id="second-org-yes" class="radio" value="yes" /><label for="second-org-yes">Yes</label>
-							<input type="radio" name="second-organism" id="second-org-no" class="radio" value="no" /><label for="second-org-no">No</label>							
+							<input type="radio" name="second-organism" id="second-org-yes" class="radio second-radios" value="yes" /><label for="second-org-yes">Yes</label>
+							<input type="radio" name="second-organism" id="second-org-no" class="radio second-radios" value="no" /><label for="second-org-no">No</label>							
 						</td>
 						<!-- when both radio buttons are pressed, show big button -->
-						<!-- also, change 'Initialize scanner'   uuuuugggglllllyyyy -->
 				</table>
 			</div>
 
-			<div class="survey-done-text">
+			<div class="survey-done-text next-rainforest">
 				Done? Go to the next rainforest and perform a QR scan.
+				<button class="big-button"><b>Initialize scanner</b></button>
 			</div>
-			<button class="big-button"><b>Initialize scanner</b></button>
-			<button class="small-button"><b>Next</b></button>
+			<div class="survey-done-text finished">
+				Done? Click next to continue
+				<button class="small-button"><b>Next</b></button>
+			</div>
+
 		</div>
 
 		
@@ -222,7 +228,7 @@
 			</div>
 
 			<div class="full-text-box">
-				<div class="title"><b>Interview with <span class="first-date">NEEDS TO BE DYNAMIC</span></b></div>
+				<div class="title"><b>Interview with <span class="interview-choice"></span></b></div>
 				<br>
 				<div>
 					What is your group's variable?
