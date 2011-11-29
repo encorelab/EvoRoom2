@@ -62,13 +62,13 @@
 
 /*************************************TO BE MOVED?****************************************/
 
-#student-chosen-animals {
+#student-chosen-organisms {
 	position: absolute;
 	top: 20px;
 	right: 20px;
 }
 
-#student-chosen-animals .animal-image {
+#student-chosen-organisms .organism-image {
 	height: 200px;
 	width: 200px;
 }
