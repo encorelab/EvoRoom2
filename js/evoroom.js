@@ -97,6 +97,14 @@ var EvoRoom = {
 		$('#final-picks-choice').hide();
 		$('#final-picks-debrief').hide();
 	},
+	
+	barcodeScanSuccess: function(result) {
+		alert("Got Barcode: " +result);
+	},
+	
+	barcodeScanFailure: function(msg) {
+	    alert("SCAN FAILED: "+msg);
+	},
 
 	setupPageLayout: function() {
 		$('.jquery-radios').buttonset();
@@ -106,6 +114,8 @@ var EvoRoom = {
 			$('#survey-welcome').show();
 			$('#student-chosen-animals').show();
 			// trigger the QR scan screen/module, but what is this scan for?
+			alert("calling scanner now");
+			window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccess, Sail.app.barcodeScanFailure);		
 		});
 
 		$('#survey-welcome .big-button').click(function() {
