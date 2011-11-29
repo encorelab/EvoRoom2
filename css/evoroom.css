@@ -140,12 +140,121 @@
 
 /*************************************TO BE MOVED?****************************************/
 
-#speed-date-intro .links {
+#interview-intro .links {
 	margin-top: 100px;
 	text-align: center;
 	text-decoration: underline;
 	color: #00A99D;
 }
+
+#interview .suggested-questions {
+	position: absolute;
+	top: 0px;
+	left: 50%;			
+	margin-left: -260px;
+	width: 520px;
+	height: 280px;
+	display: table;
+	background-color: #F7F7F7;
+	padding: 20px;
+	font-size: 20px;
+}
+
+#interview .suggested-questions .title {
+	font-size: 24px;
+	margin-bottom: 10px;
+}
+
+#interview .dropdown-content-box {
+	margin-top: 20px;
+	text-align: center;
+}
+
+#interview .dropdown {
+	height: 50px;
+	width: 100px;
+	font-size: 42px;
+}
+
+#interview .interview-content-title {
+	margin-top: 25px;
+}
+
+#interview .interview-content-text-entry {
+	margin-top: 5px;
+	width: 440px;
+	height: 350px;
+	font-size: 24px;
+}
+
+#group-notes {
+	position: absolute;
+	left: 50%;			
+	margin-left: -330px;
+	width: 660px;
+	height: 1186px;
+	display: table;
+	background-color: #F7F7F7;
+}
+
+#group-notes .notes-table {
+	width: 660px;
+	height: 660px;
+	border: 1px solid black;
+	border-collapse: collapse;
+
+}
+
+#group-notes .notes-table th {
+	height: 60px;
+	border-left: 1px solid black;
+	border-bottom: 1px solid black;
+}
+
+#group-notes .table-header-small {
+	width: 170px;
+}
+
+#group-notes .table-header-big {
+	width: 320px;
+}
+
+#group-notes .notes-table td {
+	padding-left: 10px;
+	padding-top: 8px;
+	height: 100px;
+	border-left: 1px solid black;
+	text-align: left;
+	vertical-align: top;
+}
+
+#group-notes .completion-text {
+	margin-top: 20px;
+	margin-left: 20px;
+	height: 52px;
+	vertical-align: middle;
+}
+
+#group-notes .sync-button {
+	margin-left: 80px;
+	width: 354px;
+	height: 52px;
+	font-size: 24px;
+	color: white;
+	background: url('');
+	background-color: #00A99D;
+	border: 1px solid #00A99D;
+}
+
+#group-notes .group-notes-content-box {
+	position: absolute;
+	left: 50%;
+	margin-left: -225px;
+	margin-top: 80px;
+	width: 450px;
+	text-align: center;
+}
+
 
 /*************************************TO BE MOVED?****************************************/
 

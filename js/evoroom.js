@@ -89,7 +89,9 @@ var EvoRoom = {
 		$('#rotation-field-guide').hide();
 		$('#rotation-prediction').hide();
 		$('#rotation-next-rainforest').hide();
-		$('#speed-date-intro').hide();
+		$('#interview-intro').hide();
+		$('#interview').hide();
+		$('#group-notes').hide();
 		$('#final-picks-ranking').hide();
 		$('#final-picks-discuss').hide();
 		$('#final-picks-choice').hide();
@@ -161,29 +163,40 @@ var EvoRoom = {
 		$('#rotation-next-rainforest .big-button').click(function() {
 			$('#rotation-next-rainforest').hide();
 			// if complete {
-			$('#speed-date-intro').show();
+			$('#interview-intro').show();
 			// else {
 			// something else
 		});
 
-		$('#speed-date-intro .first-date').click(function() {            
-			$('#speed-date-intro').hide();
-			// does Michelle want both of these links to just lead to next page?
-
-			// TEMP
-			$('#final-picks-ranking').show();
+		$('#interview-intro .first-date').click(function() {
+			$('#interview-intro').hide();
+			$('#interview').show();
 		});
 
-		// MORE NEEDED ON SPEED DATE
+		$('#interview .small-button').click(function() {
+			$('#interview').hide();
+			$('#group-notes').show();
+			// grab stuff from db, populate .notes-table .first + .second
+		});
+		
+		$('#group-notes .sync-button').click(function() {
+			// grab stuff from db, populate rest of .notes-table
+		});
+
+		$('#group-notes .small-button').click(function() {
+			$('#group-notes').hide();
+			$('#final-picks-ranking').show();
+		});
 
 		$('#final-picks-ranking .small-button').click(function() {
 			// send out group rankings to DB
 			$('#final-picks-ranking').hide();
 			$('#final-picks-discuss').show();
+			// fill in .discussion-content-question with question particular to the student
 		});
 
 		$('#final-picks-discuss .small-button').click(function() {
-			// send out group discussion content to DB
+			// send out .discussion-content-text-entry content to DB
 			$('#final-picks-discuss').hide();
 			$('#final-picks-choice').show();
 		});

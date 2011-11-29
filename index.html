@@ -96,8 +96,10 @@
 							<input type="radio" name="second-organism" id="second-org-yes" class="radio" value="yes" /><label for="second-org-yes">Yes</label>
 							<input type="radio" name="second-organism" id="second-org-no" class="radio" value="no" /><label for="second-org-no">No</label>							
 						</td>
-				</table>	
-			</div>		
+						<!-- when both radio buttons are pressed, show big button -->
+						<!-- also, change 'Initialize scanner'   uuuuugggglllllyyyy -->
+				</table>
+			</div>
 
 			<div class="survey-done-text">
 				Done? Go to the next rainforest and perform a QR scan.
@@ -135,7 +137,7 @@
 				<div class="rainforest-choice-radios jquery-radios">
 					<input type="radio" name="second-organism" id="rainforest-choice-yes" class="radio" value="yes" /><label for="rainforest-choice-yes">Yes</label>
 					<input type="radio" name="second-organism" id="rainforest-choice-no" class="radio" value="no" /><label for="rainforest-choice-no">No</label>							
-				</div>				
+				</div>
 			</div>
 			<div class="rainforest-explanation">
 				Give a brief explanation for your answer.
@@ -169,7 +171,7 @@
 				Follow the link below to go to your group's page.
 			</div>
 			<div class="rotation-link">
-				<!-- the link will need to be dynamic to Drupal site, based on the group via rollcall -->			
+				<!-- the link will need to be dynamic to Drupal site, based on the group via rollcall -->
 				<a class="rotation-link" href="http://yahoo.ca">Go to your <b>Group's Page</b></a>
 			</div>
 			<div class="rotation-done-text">
@@ -186,12 +188,12 @@
 				When you have all arrived, perform a QR scan.
 			</div>
 			<button class="big-button"><b>Initialize scanner</b></button>
-		</div>		
+		</div>
 
 
 <!-- *********************************************SPEED DATING**************************************************** -->
 
-		<div id="speed-date-intro" class="full-text-box">
+		<div id="interview-intro" class="full-text-box">
 			<div class="title"><b>Step 2 complete</b></div>
 			<br>
 			<div>
@@ -207,7 +209,100 @@
 			</div>	
 		</div>
 		
-		<!-- MORE NEEDED HERE, SKIPPED UNTIL WE TALK TO MICHELLE -->
+		<div id="interview">
+			<div class="suggested-questions">
+				<div class="title">
+					<b>Suggested questions:</b>
+				</div>
+				<div>1. What is your variable?</div>
+				<div>2. What speciality are you?</div>
+				<div>3. Which rainforest do you think is related to your variable? Why?</div>
+				<div>4. How confident are you and your group members?</div>
+				<div>5. ...</div>
+			</div>
+
+			<div class="full-text-box">
+				<div class="title"><b>Interview with <span class="first-date">NEEDS TO BE DYNAMIC</span></b></div>
+				<br>
+				<div>
+					What is your group's variable?
+				</div>
+				<div class="dropdown-content-box">
+	              	<select class="variable-dropdown dropdown">
+	              		<option value="undefined">...</option>
+						<option value="high-rainfall">High rainfall</option>
+						<option value="low-rainfall">Low rainfall</option>
+						<option value="high-sunlight">High sunlight</option>
+						<option value="low-sunlight">Low sunlight</option>
+						<option value="high-temperature">High temperature</option>
+						<option value="low-temperature">Low temperature</option>
+						<option value="logging">Logging</option>
+						<option value="conservation">Conservation</option>
+						<option value="earthquake">Earthquake</option>
+						<option value="tsunami">Tsunami</option>
+					</select>
+				</div>
+				<div class="interview-content-title">
+					<b>Notes</b>
+				</div>
+				<textarea class="interview-content-text-entry"></textarea>
+				
+				<button class="small-button"><b>Done</b></button>
+			</div>
+		</div>
+		
+		<div id="group-notes">
+			<table class="notes-table">
+				<tr>
+					<th class="table-header-small"><b>Researcher</b></th>
+					<th class="table-header-small"><b>Variable</b></th>
+					<th class="table-header-big"><b>Notes</b></th>
+				</tr>
+				<tr>
+					<td class="researcher first"></td>
+					<td class="variable first"></td>
+					<td class="notes first"></td>
+				</tr>
+				<tr>
+					<td class="researcher second"></td>
+					<td class="variable second"></td>
+					<td class="notes second"></td>
+				</tr>
+				<tr>
+					<td class="researcher third">3</td>
+					<td class="variable third">3</td>
+					<td class="notes third">3</td>
+				</tr>
+				<tr>
+					<td class="researcher fourth">4</td>
+					<td class="variable fourth">4</td>
+					<td class="notes fourth">4</td>
+				</tr>
+				<tr>
+					<td class="researcher fifth">5</td>
+					<td class="variable fifth">5</td>
+					<td class="notes fifth">5</td>
+				</tr>
+				<tr>
+					<td class="researcher sixth">6</td>
+					<td class="variable sixth">6</td>
+					<td class="notes sixth">6</td>
+				</tr>
+			</table>
+
+			<div class="completion-text">
+				<b>Step 3 complete</b>
+				<button class="sync-button"><b>Sync notes with group</b></button>
+			</div>
+			
+			
+			<div class="group-notes-content-box">
+				Discuss amongst group members and rank the rainforests from no. 1 to 4, with no. 1 as the environment
+				that most likely result from YOUR variable. When you are ready, record your choices.
+			</div> 
+			
+			<button class="small-button"><b>Rank</b></button>		
+		</div>
 		
 		
 <!-- *********************************************FINAL PICKS**************************************************** -->		
@@ -268,7 +363,7 @@
 								<option value="4">4</option>
 							</select>
 						</td>
-                    </tr>                    
+                    </tr>
                 </table>
             </div>
             
@@ -295,7 +390,7 @@
 				<textarea class="discussion-content-text-entry"></textarea>
 			</div>
 			<button class="small-button"><b>Done</b></button> 
-		</div>		
+		</div>
 		
 		<div id="final-picks-choice" class="full-text-box">
 			<div class="title"><b>Step 4 almost complete</b></div>
