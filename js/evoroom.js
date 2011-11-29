@@ -1,16 +1,10 @@
 /*jslint devel: true, regexp: true, browser: true, unparam: true, debug: true, sloppy: true, sub: true, es5: true, vars: true, evil: true, fragment: true, white: true */
 /*globals Sail, Rollcall, $, Foo */
 
-
-// hide scan button in 1-3 until yes/no completed
-// 'initialize scanner' is a bad name
-
-var rainforestCounter = 0;
-var dateChoice = null;
-var firstInterview = false;
-var secondInterview = false;
-
 var EvoRoom = {
+	currentGroupCode: null,
+	currentRainforest: null,
+		
 	rollcallURL: '/rollcall',
 
 	events: {
@@ -23,14 +17,14 @@ var EvoRoom = {
 			Sail.app.authenticate();
 		},
 
-		connected: function(ev) {
+		authenticated: function(ev) {
 
 		},
 
-		authenticated: function(ev) {
+		connected: function(ev) {
 			Sail.app.setupPageLayout();
 		},
-
+		
 		unauthenticated: function(ev) {
 			Rollcall.Authenticator.requestRun();
 		}
@@ -71,10 +65,13 @@ var EvoRoom = {
 		} else if (!Sail.app.token) {
 			Rollcall.Authenticator.requestLogin();
 		} else {
-			Sail.app.rollcall.fetchSessionForToken(Sail.app.token, 
-					function(data) {
-				Sail.app.session = data.session;
-				$(Sail.app).trigger('authenticated');
+            Sail.app.rollcall.fetchSessionForToken(Sail.app.token, function(data) {
+                Sail.app.session = data.session;
+                Sail.app.rollcall.request(Sail.app.rollcall.url + "/users/"+Sail.app.session.account.login+".json",
+	                "GET", {}, function(data) {
+	                    Sail.app.currentGroupCode = data.user.groups[0].name;
+	                    $(Sail.app).trigger('authenticated');
+	                });
 			},
 			function(error) {
 				console.warn("Token '"+Sail.app.token+"' is invalid. Will try to re-authenticate...");
@@ -86,7 +83,7 @@ var EvoRoom = {
 
 	hidePageElements: function() {
 		$('#survey-welcome').hide();
-		$('#student-chosen-animals').hide();
+		$('#student-chosen-organisms').hide();
 		$('#survey-organisms').hide();
 		$('#survey-organisms .next-rainforest').hide();
 		$('#survey-organisms .finished').hide();
@@ -100,6 +97,8 @@ var EvoRoom = {
 		$('#group-notes').hide();
 		$('#final-picks-ranking').hide();
 		$('#final-picks-discuss').hide();
+		$('#final-picks-discuss .question2').hide();
+		$('#final-picks-discuss .question3').hide();
 		$('#final-picks-choice').hide();
 		$('#final-picks-debrief').hide();
 	},
@@ -113,12 +112,17 @@ var EvoRoom = {
 	},
 
 	setupPageLayout: function() {
+		var rainforestCounter = 0;		
+		var dateChoice = null;
+		var firstInterview = false;
+		var secondInterview = false;
+		
 		$('.jquery-radios').buttonset();
 
 		$('#log-in-success .big-button').click(function() {
 			$('#log-in-success').hide();
 			$('#survey-welcome').show();
-			$('#student-chosen-animals').show();
+			$('#student-chosen-organisms').show();
 			// trigger the QR scan screen/module, but what is this scan for?
 			alert("calling scanner now");
 			window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccess, Sail.app.barcodeScanFailure);		
@@ -127,7 +131,7 @@ var EvoRoom = {
 		$('#survey-welcome .big-button').click(function() {
 			$('#survey-welcome').hide();
 			$('#survey-organisms').show();
-			// register the rainforest location, set (in a var? or pass it?)
+			// put the rainforest into currentRainforest;
 
 			// clear radio buttons
 			$('input:radio').prop('checked', false);
@@ -138,7 +142,8 @@ var EvoRoom = {
 		// this also needs to check if all of the rainforests are complete, then show small-button instead TODO
 		$('#survey-organisms .radio').click(function() {
 			if ( $('.first-radios').is(':checked') && $('.second-radios').is(':checked') ) {
-				if (rainforestCounter > 2) {
+				// temp set to 0 instead of 2, for testing
+				if (rainforestCounter > 0) {
 					$('#survey-organisms .finished').show();
 				}
 				else {
@@ -148,7 +153,7 @@ var EvoRoom = {
 		});
 
 		$('#survey-organisms .big-button').click(function() {
-			// Sail.app.organismPresent() rename
+			Sail.app.submitOrganismsPresent();
 			
 			// perform QR scan
 
@@ -163,7 +168,7 @@ var EvoRoom = {
 
 		$('#survey-organisms .small-button').click(function() {
 			$('#survey-organisms').hide();
-			$('#student-chosen-animals').hide();
+			$('#student-chosen-organisms').hide();
 
 			// check agent for which screen to show. Isn't there a better way to do this? Agent will be slow, at least TODO
 			$('#rotation-intro').show();
@@ -180,7 +185,8 @@ var EvoRoom = {
 		});
 
 		$('#rotation-note-taker .small-button').click(function() {
-			// EVENT TODO "rotation_submitted"
+			Sail.app.submitRainforestGuess();
+
 			$('#rotation-note-taker').hide();
 			// check agent for which screen to show next TODO
 			$('#rotation-field-guide').show();
@@ -224,12 +230,18 @@ var EvoRoom = {
 		// this might be a: sloppy, b: dangerous (will they *always* have exactly 2 interviews?). Is there a better approach?
 		$('#interview .small-button').click(function() {
 			if (firstInterview && secondInterview) {
+				Sail.app.submitInterview();
+
 				$('#interview').hide();
 				$('#group-notes').show();
-				// EVENT TODO "interview_submitted"
 				// grab stuff from db, populate .notes-table .first + .second TODO
 			}
 			else {
+				Sail.app.submitInterview();
+				
+				$('#interview .variable-dropdown').val('');
+				$('#interview .interview-content-text-entry').val('');
+				
 				$('#interview').hide();
 				$('#interview-intro').show();
 			}
@@ -245,7 +257,8 @@ var EvoRoom = {
 		});
 
 		$('#final-picks-ranking .small-button').click(function() {
-			// EVENT TODO "rankings_submitted"
+			Sail.app.submitRankings();
+
 			$('#final-picks-ranking').hide();
 			$('#final-picks-discuss').show();
 			// fill in .discussion-content-question with question particular to the student
@@ -254,7 +267,7 @@ var EvoRoom = {
 		});
 
 		$('#final-picks-discuss .small-button').click(function() {
-			// send out .discussion-content-text-entry content EVENT TODO "rationale_submitted"
+			Sail.app.submitRationale();
 			$('#final-picks-discuss').hide();
 			$('#final-picks-choice').show();
 		});
@@ -264,7 +277,74 @@ var EvoRoom = {
 			$('#final-picks-choice').hide();
 			$('#final-picks-debrief').show();
 		});
+	},
+	
+/********************************************* EVENTS *******************************************/
+
+	submitOrganismsPresent: function() {
+		var sev = new Sail.Event('organism_present', {
+			group_code:EvoRoom.currentGroupCode,
+			author:Sail.app.session.account.login,
+			rainforest:EvoRoom.currentRainforest,
+			first_organism:{
+				organism:$('#survey-organisms .first-organism').val(),
+				present:$('input:radio[name=first-organism-yn]:checked').val()
+			},
+			second_organism:{
+				organism:$('#survey-organisms .second-organism').val(),
+				present:$('input:radio[name=first-organism-yn]:checked').val()
+			}
+		});
+		EvoRoom.groupchat.sendEvent(sev);
+	},
+	
+	submitRainforestGuess: function() {
+		var sev = new Sail.Event('rainforest_guess_submitted', {
+			group_code:EvoRoom.currentGroupCode,
+			author:Sail.app.session.account.login,
+			rainforest:EvoRoom.currentRainforest,
+			your_rainforest:$('input:radio[name=your-rainforest]:checked').val(),
+			explanation:$('#rotation-note-taker .rainforest-explanation-text-entry').val()
+		});
+		EvoRoom.groupchat.sendEvent(sev);
+	},
+	
+	submitInterview: function() {
+		var sev = new Sail.Event('interview_submitted', {
+			group_code:EvoRoom.currentGroupCode,
+			author:Sail.app.session.account.login,
+			variable:$('select.variable-dropdown').val(),
+			notes:$('#interview .interview-content-text-entry').val()
+		});
+		EvoRoom.groupchat.sendEvent(sev);
+	},
+	
+	submitRankings: function() {
+		var sev = new Sail.Event('rankings_submitted', {
+			group_code:EvoRoom.currentGroupCode,
+			author:Sail.app.session.account.login,
+	        ranks:{
+	            rainforest_a:$('select.A-dropdown').val(),
+	            rainforest_b:$('select.B-dropdown').val(),
+	            rainforest_c:$('select.C-dropdown').val(),
+	            rainforest_d:$('select.D-dropdown').val()
+	        }
+		});
+		EvoRoom.groupchat.sendEvent(sev);
+	},
+	
+	submitRationale: function() {
+		var sev = new Sail.Event('rationale_submitted', {
+			group_code:EvoRoom.currentGroupCode,
+			author:Sail.app.session.account.login,
+			question:$('#final-picks-discuss .discussion-content-question').attr('value'),
+			answer:$('#final-picks-discuss .discussion-content-text-entry').val()
+		});
+		EvoRoom.groupchat.sendEvent(sev);
+	}	
+	
+	
+/****************************************** HELPER FUNCTIONS *************************************/
 
 
-	}
 };
