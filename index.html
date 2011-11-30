@@ -50,7 +50,7 @@
 				<br><br>
 				When you are ready to begin, proceed to the simulation lab (in room 204a) and perform a QR scan with this device. 
 			</div>
-			<button class="big-button"><b>Initialize scanner</b></button>
+			<button class="big-button"><b>QR scan</b></button>
 		</div>
 	
  		<div id="survey-welcome" class="full-text-box">
@@ -67,7 +67,7 @@
 				<br><br>
 				When you are ready, approach one of the rainforest stations and perform a QR scan.
 			</div>
-			<button class="big-button"><b>Initialize scanner</b></button>
+			<button class="big-button"><b>QR scan</b></button>
 		</div>
 	
 		<div id="survey-organisms" class="full-text-box">
@@ -89,8 +89,8 @@
 							<!-- TODO -->
 						</td>
 						<td class="first-organism-radios jquery-radios">
-							<input type="radio" name="first-organism-yn" id="first-org-yes" class="radio first-radios" value="yes" /><label for="first-org-yes">Yes</label>
-							<input type="radio" name="first-organism-yn" id="first-org-no" class="radio first-radios" value="no" /><label for="first-org-no">No</label>							
+							<input type="radio" name="first-organism-yn" id="first-org-yes" class="radio first-radios" value="true" /><label for="first-org-yes">Yes</label>
+							<input type="radio" name="first-organism-yn" id="first-org-no" class="radio first-radios" value="false" /><label for="first-org-no">No</label>							
 						</td>
 					</tr>
 					<tr>
@@ -99,8 +99,8 @@
 							<!-- TODO -->
 						</td>
 						<td class="second-organism-radios jquery-radios">
-							<input type="radio" name="second-organism-yn" id="second-org-yes" class="radio second-radios" value="yes" /><label for="second-org-yes">Yes</label>
-							<input type="radio" name="second-organism-yn" id="second-org-no" class="radio second-radios" value="no" /><label for="second-org-no">No</label>							
+							<input type="radio" name="second-organism-yn" id="second-org-yes" class="radio second-radios" value="true" /><label for="second-org-yes">Yes</label>
+							<input type="radio" name="second-organism-yn" id="second-org-no" class="radio second-radios" value="false" /><label for="second-org-no">No</label>							
 						</td>
 						<!-- when both radio buttons are pressed, show big button -->
 				</table>
@@ -108,7 +108,7 @@
 
 			<div class="survey-done-text next-rainforest">
 				Done? Go to the next rainforest and perform a QR scan.
-				<button class="big-button"><b>Initialize scanner</b></button>
+				<button class="big-button"><b>QR scan</b></button>
 			</div>
 			<div class="survey-done-text finished">
 				Done? Click next to continue
@@ -131,7 +131,7 @@
 				Gather your group members and go to <span class="current-rainforest orange">Temp rainforest lorum</span>.
 				When you have all arrived, perform a QR scan. 
 			</div>
-			<button class="big-button"><b>Initialize scanner</b></button>
+			<button class="big-button"><b>QR scan</b></button>
 		</div>
 
 		<div id="rotation-note-taker" class="full-text-box">
@@ -144,8 +144,8 @@
 			<div class="rainforest-choice">
 				Could this be your rainforest?
 				<div class="rainforest-choice-radios jquery-radios">
-					<input type="radio" name="your-rainforest" id="rainforest-choice-yes" class="radio" value="yes" /><label for="rainforest-choice-yes">Yes</label>
-					<input type="radio" name="your-rainforest" id="rainforest-choice-no" class="radio" value="no" /><label for="rainforest-choice-no">No</label>							
+					<input type="radio" name="your-rainforest" id="rainforest-choice-yes" class="radio" value="true" /><label for="rainforest-choice-yes">Yes</label>
+					<input type="radio" name="your-rainforest" id="rainforest-choice-no" class="radio" value="false" /><label for="rainforest-choice-no">No</label>							
 				</div>
 			</div>
 			<div class="rainforest-explanation">
@@ -155,38 +155,36 @@
 			<button class="small-button"><b>Done</b></button>
 		</div>
 		
-		<div id="rotation-field-guide" class="full-text-box">
-			<div class="title"><b>Location: </b><span class="current-rainforest">Temp rainforest lorum</span></div>
-			<br>
-			<div>
-				<b>Instructions:</b> Your assignment at this location is to look up information in your field guide.
-				Follow the link below to go to the field guide site.
+		<iframe id="field-guide-frame" class="iframe" src="http://utslearningportfolio.oise.utoronto.ca"></iframe>
+		<iframe id="group-page-frame" class="iframe" src="http://utslearningportfolio.oise.utoronto.ca"></iframe>
+		<button id="iframe-close-button">Close</button>
+		
+		<div id="rotation-field-guide">
+			<div class="full-text-box">
+				<div class="title"><b>Location: </b><span class="current-rainforest">Temp rainforest lorum</span></div>
+				<br>
+				<div>
+					<b>Instructions:</b> Your assignment at this location is to look up information in your field guide.
+					Follow the link below to go to the field guide site.
+				</div>
+	 			<div class="rotation-link">
+					<div class="field-guide-link">Go to the <b>Field Guide</b></div>
+				</div>
 			</div>
-			<div class="rotation-link">
-				<!-- the link will need to be dynamic to Drupal site, based on the group via rollcall -->
-				<a class="rotation-link" href="http://google.ca">Go to the <b>Field Guide</b></a>
-			</div>		
-			<div class="rotation-done-text">
-				Ready to move on to the next station or step? Click done.
-			</div>
-			<button class="small-button"><b>Done</b></button>
 		</div>
 		
-		<div id="rotation-prediction" class="full-text-box">
-			<div class="title"><b>Location: </b><span class="current-rainforest">Temp rainforest lorum</span></div>
-			<br>
-			<div>
-				<b>Instructions:</b> Your assignment at this location is to look up your prediction.
-				Follow the link below to go to your group's page.
+		<div id="rotation-prediction">
+			<div class="full-text-box">
+				<div class="title"><b>Location: </b><span class="current-rainforest">Temp rainforest lorum</span></div>
+				<br>
+				<div>
+					<b>Instructions:</b> Your assignment at this location is to look up your prediction.
+					Follow the link below to go to your group's page.
+				</div>
+				<div class="rotation-link">
+					<div class="group-page-link">Go to your <b>Group's Page</b></div>
+				</div>
 			</div>
-			<div class="rotation-link">
-				<!-- the link will need to be dynamic to Drupal site, based on the group via rollcall -->
-				<a class="rotation-link" href="http://yahoo.ca">Go to your <b>Group's Page</b></a>
-			</div>
-			<div class="rotation-done-text">
-				Ready to move on to the next station or step? Click done.
-			</div>
-			<button class="small-button"><b>Done</b></button>
 		</div>
 
 		<div id="rotation-next-rainforest" class="full-text-box">
@@ -196,7 +194,7 @@
 				Go to <span class="next-rainforest .orange"><b>Next rainforest lorum</b></span>.
 				When you have all arrived, perform a QR scan.
 			</div>
-			<button class="big-button"><b>Initialize scanner</b></button>
+			<button class="big-button"><b>QR scan</b></button>
 		</div>
 
 
@@ -391,10 +389,7 @@
 			<div class="discussion-content-box question1">
 				<div value="strategy" class="discussion-content-question">What is your strategy in ranking the rainforests? Describe your process.</div>
 				<!-- Each student in a group gets one of the questions below, to be inserted above
-				(if there are only 2 group members leave out the last one)
-				What is your strategy in ranking the rainforests? Describe your process.
-				Identify at least 3 key pieces of evidence in making your choices.
-				What are some important information you gleaned from other groups.
+				(if there are only 2 group members leave out the last one) TODO
 				 -->
 				<textarea class="discussion-content-text-entry"></textarea>
 			</div>
@@ -415,7 +410,7 @@
 			<div>
 				Go to the rainforest that represents your first choice and perform a QR scan.
 			</div>
-			<button class="big-button"><b>Initialize scanner</b></button>
+			<button class="big-button"><b>QR scan</b></button>
 		</div>
 		
 		<div id="final-picks-debrief" class="full-text-box">
