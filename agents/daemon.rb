@@ -1,9 +1,9 @@
 $: << "sail.rb/lib"
 require 'sail/daemon'
 
-require 'archivist'
+require 'event_logger'
 
-AGENT_PASSWORD = "1d6f760bc95729166e551d7bee1d75c69b133015"
+AGENT_PASSWORD = "3253212e47e29dc6447ea760357e7290979d43b8"
 
 @daemon = Sail::Daemon.spawn(
   :name => "evoroom",
@@ -14,7 +14,7 @@ AGENT_PASSWORD = "1d6f760bc95729166e551d7bee1d75c69b133015"
 @daemon.load_config("../config.json")
 
 # A run 1
-@daemon << Archivist.new(:room => "michelle-fall-2011", :password => AGENT_PASSWORD, :database => 'evoroom')
+@daemon << EventLogger.new(:room => "michelle-fall-2011", :password => AGENT_PASSWORD, :database => 'evoroom')
 
 # A run 2
 #@daemon << Archivist.new(:room => "evoroom-a2", :password => AGENT_PASSWORD, :database => 'evoroom')
