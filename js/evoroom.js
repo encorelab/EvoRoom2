@@ -82,6 +82,8 @@ var EvoRoom = {
 	},
 
 	hidePageElements: function() {
+		//$('#loading-page').hide();
+		$('#log-in-success').hide();
 		$('#survey-welcome').hide();
 		$('#student-chosen-organisms').hide();
 		$('#survey-organisms').hide();
@@ -333,6 +335,8 @@ var EvoRoom = {
 		});
 		EvoRoom.groupchat.sendEvent(sev);
 	},
+	
+
 	
 	submitInterview: function() {
 		var sev = new Sail.Event('interview_submitted', {
