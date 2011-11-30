@@ -2,7 +2,6 @@ $: << "sail.rb/lib"
 require 'sail/daemon'
 
 require 'archivist'
-require 'notetaker'
 
 AGENT_PASSWORD = "1d6f760bc95729166e551d7bee1d75c69b133015"
 
