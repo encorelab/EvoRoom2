@@ -91,6 +91,7 @@ var EvoRoom = {
 		$('#rotation-note-taker').hide();
 		$('#rotation-field-guide').hide();
 		$('#field-guide-frame').hide();
+		$('#group-page-frame').hide();
 		$('#iframe-close-button').hide();
 		$('#rotation-prediction').hide();
 		$('#rotation-next-rainforest').hide();
