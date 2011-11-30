@@ -129,13 +129,27 @@
 
 .rotation-link {
 	margin-top: 80px;
-	color: #00A99D;
 	text-align: center;
+	text-decoration: underline;
+	color: #00A99D;
 }
 
-.rotation-done-text {
-	margin-top: 220px;
-	text-align: center;
+.iframe {
+	position: absolute;
+	top: 36px;
+	width: 800px;
+	height: 1150px;
+	display: table;
+}
+
+#iframe-close-button {
+	position: absolute;
+	top: 3px;
+	right: 4px;
+	width: 80px;
+	height: 30px;
+	display: table;
+	font-size: 14px;
 }
 
 /*************************************TO BE MOVED?****************************************/
