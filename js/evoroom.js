@@ -90,6 +90,8 @@ var EvoRoom = {
 		$('#rotation-intro').hide();
 		$('#rotation-note-taker').hide();
 		$('#rotation-field-guide').hide();
+		$('#field-guide-frame').hide();
+		$('#iframe-close-button').hide();
 		$('#rotation-prediction').hide();
 		$('#rotation-next-rainforest').hide();
 		$('#interview-intro').hide();
@@ -143,7 +145,7 @@ var EvoRoom = {
 		$('#survey-organisms .radio').click(function() {
 			if ( $('.first-radios').is(':checked') && $('.second-radios').is(':checked') ) {
 				// temp set to 0 instead of 2, for testing
-				if (rainforestCounter > 0) {
+				if (rainforestCounter >= 0) {
 					$('#survey-organisms .finished').show();
 				}
 				else {
@@ -151,6 +153,7 @@ var EvoRoom = {
 				}
 			}
 		});
+		// shouldn't there by .hides in the above?
 
 		$('#survey-organisms .big-button').click(function() {
 			Sail.app.submitOrganismsPresent();
@@ -174,7 +177,6 @@ var EvoRoom = {
 			$('#rotation-intro').show();
 		});
 
-
 		$('#rotation-intro .big-button').click(function() {
 			$('#rotation-intro').hide();
 			// check which rainforest is next
@@ -184,21 +186,22 @@ var EvoRoom = {
 			$('#rotation-note-taker').show();
 		});
 
+		// this will be removed eventually TODO
 		$('#rotation-note-taker .small-button').click(function() {
 			Sail.app.submitRainforestGuess();
 
 			$('#rotation-note-taker').hide();
 			// check agent for which screen to show next TODO
-			$('#rotation-next-rainforest').show();
+			$('#rotation-field-guide').show();
 		});
 
-/*		// this will be removed eventually TODO
+		// this will be removed eventually TODO
 		$('#rotation-field-guide .small-button').click(function() {
 			$('#rotation-field-guide').hide();
 			// check agent for which screen to show next TODO
-			$('#rotation-prediction').show();
+			$('#rotation-next-rainforest').show();
 		});
-
+/*
 		// this will be removed eventually TODO
 		$('#rotation-prediction .small-button').click(function() {
 			$('#rotation-prediction').hide();
@@ -206,6 +209,25 @@ var EvoRoom = {
 			$('#rotation-next-rainforest').show();
 		});*/
 
+		$('#rotation-field-guide .field-guide-link').click(function() {
+			$('#field-guide-frame').show();
+			$('#field-guide-frame').appendTo('#rotation-field-guide');
+			$('#iframe-close-button').show();
+			$('#iframe-close-button').appendTo('#rotation-field-guide');
+		});
+		
+		$('#rotation-prediction .group-page-link').click(function() {
+			$('#group-page-frame').show();
+			$('#group-page-frame').appendTo('#rotation-prediction');
+			$('#iframe-close-button').show();
+			$('#iframe-close-button').appendTo('#rotation-prediction');
+		});
+		
+		$('#iframe-close-button').click(function() {
+			$('.iframe').hide();
+			$('#iframe-close-button').hide();
+		});
+		
 		$('#rotation-next-rainforest .big-button').click(function() {
 			// QR scan TODO
 			$('#rotation-next-rainforest').hide();
