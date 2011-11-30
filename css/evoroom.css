@@ -60,6 +60,20 @@
 	color: #FB983B;
 }
 
+#loading-page {
+	width: 100%;
+	height: 100%;	
+	font-size: 40px;	
+	background: url('');
+	background-color: #F7F7F7;		
+}
+
+#loading-page .wait-text {
+	position: absolute;
+	top: 400px;
+	left: 200px;
+}
+
 /*************************************TO BE MOVED?****************************************/
 
 #student-chosen-organisms {
