@@ -189,20 +189,22 @@ var EvoRoom = {
 
 			$('#rotation-note-taker').hide();
 			// check agent for which screen to show next TODO
-			$('#rotation-field-guide').show();
+			$('#rotation-next-rainforest').show();
 		});
 
+/*		// this will be removed eventually TODO
 		$('#rotation-field-guide .small-button').click(function() {
 			$('#rotation-field-guide').hide();
 			// check agent for which screen to show next TODO
 			$('#rotation-prediction').show();
 		});
 
+		// this will be removed eventually TODO
 		$('#rotation-prediction .small-button').click(function() {
 			$('#rotation-prediction').hide();
 			// check agent for which screen to show next TODO
 			$('#rotation-next-rainforest').show();
-		});
+		});*/
 
 		$('#rotation-next-rainforest .big-button').click(function() {
 			// QR scan TODO
