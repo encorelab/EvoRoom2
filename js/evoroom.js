@@ -82,8 +82,8 @@ var EvoRoom = {
 	},
 
 	hidePageElements: function() {
-		//$('#loading-page').hide();
-		$('#log-in-success').hide();
+		$('#loading-page').hide();
+		//$('#log-in-success').hide();
 		$('#survey-welcome').hide();
 		$('#student-chosen-organisms').hide();
 		$('#survey-organisms').hide();
@@ -244,6 +244,7 @@ var EvoRoom = {
 			dateChoice = $('#interview-intro .first-date').text();
 			$('#interview .interview-choice').text(dateChoice);
 			firstInterview = true;
+			Sail.app.startInterview();
 		});
 		
 		$('#interview-intro .second-date').click(function() {
@@ -252,6 +253,7 @@ var EvoRoom = {
 			dateChoice = $('#interview-intro .second-date').text();
 			$('#interview .interview-choice').text(dateChoice);
 			secondInterview = true;
+			Sail.app.startInterview();
 		});
 
 		// this might be a: sloppy, b: dangerous (will they *always* have exactly 2 interviews?). Is there a better approach?
@@ -336,12 +338,20 @@ var EvoRoom = {
 		EvoRoom.groupchat.sendEvent(sev);
 	},
 	
-
+	startInterview: function() {
+		var sev = new Sail.Event('interview_started', {
+			group_code:EvoRoom.currentGroupCode,
+			author:Sail.app.session.account.login,
+			interviewee:$('#interview .interview-choice').text()
+		});
+		EvoRoom.groupchat.sendEvent(sev);
+	},		
 	
 	submitInterview: function() {
 		var sev = new Sail.Event('interview_submitted', {
 			group_code:EvoRoom.currentGroupCode,
 			author:Sail.app.session.account.login,
+			interviewee:$('#interview .interview-choice').text(),
 			variable:$('select.variable-dropdown').val(),
 			notes:$('#interview .interview-content-text-entry').val()
 		});
