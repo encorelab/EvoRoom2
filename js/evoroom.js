@@ -277,7 +277,7 @@ var EvoRoom = {
 		});
 
 		$('#group-notes .sync-button').click(function() {
-			// grab stuff from db, populate rest of .notes-table TODO
+			Sail.app.getInterviews();
 		});
 
 		$('#group-notes .small-button').click(function() {
@@ -312,9 +312,9 @@ var EvoRoom = {
 
 	submitOrganismsPresent: function() {
 		var sev = new Sail.Event('organism_present', {
-			group_code:EvoRoom.currentGroupCode,
+			group_code:Sail.app.currentGroupCode,
 			author:Sail.app.session.account.login,
-			rainforest:EvoRoom.currentRainforest,
+			rainforest:Sail.app.currentRainforest,
 			first_organism:{
 				organism:$('#survey-organisms .first-organism').val(),
 				present:$('input:radio[name=first-organism-yn]:checked').val()
@@ -329,9 +329,9 @@ var EvoRoom = {
 	
 	submitRainforestGuess: function() {
 		var sev = new Sail.Event('rainforest_guess_submitted', {
-			group_code:EvoRoom.currentGroupCode,
+			group_code:Sail.app.currentGroupCode,
 			author:Sail.app.session.account.login,
-			rainforest:EvoRoom.currentRainforest,
+			rainforest:Sail.app.currentRainforest,
 			your_rainforest:$('input:radio[name=your-rainforest]:checked').val(),
 			explanation:$('#rotation-note-taker .rainforest-explanation-text-entry').val()
 		});
@@ -340,7 +340,7 @@ var EvoRoom = {
 	
 	startInterview: function() {
 		var sev = new Sail.Event('interview_started', {
-			group_code:EvoRoom.currentGroupCode,
+			group_code:Sail.app.currentGroupCode,
 			author:Sail.app.session.account.login,
 			interviewee:$('#interview .interview-choice').text()
 		});
@@ -349,7 +349,7 @@ var EvoRoom = {
 	
 	submitInterview: function() {
 		var sev = new Sail.Event('interview_submitted', {
-			group_code:EvoRoom.currentGroupCode,
+			group_code:Sail.app.currentGroupCode,
 			author:Sail.app.session.account.login,
 			interviewee:$('#interview .interview-choice').text(),
 			variable:$('select.variable-dropdown').val(),
@@ -360,7 +360,7 @@ var EvoRoom = {
 	
 	submitRankings: function() {
 		var sev = new Sail.Event('rankings_submitted', {
-			group_code:EvoRoom.currentGroupCode,
+			group_code:Sail.app.currentGroupCode,
 			author:Sail.app.session.account.login,
 	        ranks:{
 	            rainforest_a:$('select.A-dropdown').val(),
@@ -374,16 +374,35 @@ var EvoRoom = {
 	
 	submitRationale: function() {
 		var sev = new Sail.Event('rationale_submitted', {
-			group_code:EvoRoom.currentGroupCode,
+			group_code:Sail.app.currentGroupCode,
 			author:Sail.app.session.account.login,
 			question:$('#final-picks-discuss .discussion-content-question').attr('value'),
 			answer:$('#final-picks-discuss .discussion-content-text-entry').val()
 		});
 		EvoRoom.groupchat.sendEvent(sev);
-	}	
+	},	
 	
 	
 /****************************************** HELPER FUNCTIONS *************************************/
 
+	getInterviews: function() {
+		$.ajax({
+			type: "GET",
+			url: "/mongoose/evoroom/events/_find",
+			data: {criteria: JSON.stringify({"run.name":Sail.app.run.name, "eventType":"interview_submitted", "payload.group_code":Sail.app.currentGroupCode})},
+			context: {},		//should this be changed?
+			success: function(data) {
+				//criteria = {"run.name":Sail.app.run.name, "eventType":"interview_submitted", "payload.group_code":Sail.app.currentGroupCode};
+				
+				if (data.ok === 1) {
+					alert('data ok');
+					//so far so good. Do we need to error check for >6 in the db?
+					$('#group-notes .researcher-first').text(data.results[0].payload.interviewee);
+					$('#group-notes .variable-first').text(data.results[0].payload.notes);
+					$('#group-notes .notes-first').text(data.results[0].payload.variable);
+				}
+			}
+		});
+	}
 
 };
