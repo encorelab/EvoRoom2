@@ -215,6 +215,8 @@
 	font-size: 24px;
 }
 
+/*************************************TO BE MOVED?****************************************/
+
 #group-notes {
 	position: absolute;
 	left: 50%;			
@@ -225,39 +227,52 @@
 	background-color: #F7F7F7;
 }
 
-#group-notes .notes-table {
+#group-notes .table-wrapper {
+	position: absolute;
+	left: 50%;
+	margin-left: -330px;
 	width: 660px;
 	height: 660px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+#group-notes .notes-table {
+	width: 634px;
 	border: 1px solid black;
 	border-collapse: collapse;
-
+	table-layout: fixed;
 }
 
 #group-notes .notes-table th {
-	height: 60px;
+	height: 55px;
 	border-left: 1px solid black;
 	border-bottom: 1px solid black;
 }
 
 #group-notes .table-header-small {
-	width: 170px;
+	width: 150px;
 }
 
 #group-notes .table-header-big {
-	width: 320px;
+	width: 334px;
 }
 
 #group-notes .notes-table td {
 	padding-left: 10px;
 	padding-top: 8px;
-	height: 100px;
 	border-left: 1px solid black;
 	text-align: left;
 	vertical-align: top;
+	font-size: 18px;
+}
+
+#group-notes .divider {
+	margin-top: 665px;
 }
 
 #group-notes .completion-text {
-	margin-top: 20px;
+	margin-top: 10px;
 	margin-left: 20px;
 	height: 52px;
 	vertical-align: middle;
@@ -278,7 +293,7 @@
 	position: absolute;
 	left: 50%;
 	margin-left: -225px;
-	margin-top: 80px;
+	margin-top: 140px;
 	width: 450px;
 	text-align: center;
 }

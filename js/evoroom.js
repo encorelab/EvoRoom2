@@ -393,14 +393,28 @@ var EvoRoom = {
 			context: {},		//should this be changed?
 			success: function(data) {
 				//criteria = {"run.name":Sail.app.run.name, "eventType":"interview_submitted", "payload.group_code":Sail.app.currentGroupCode};
-				
+
 				if (data.ok === 1) {
-					alert('data ok');
-					//so far so good. Do we need to error check for >6 in the db?
-					$('#group-notes .researcher-first').text(data.results[0].payload.interviewee);
-					$('#group-notes .variable-first').text(data.results[0].payload.notes);
-					$('#group-notes .notes-first').text(data.results[0].payload.variable);
+					for (x = 1; x < 7; x++) {
+						$('#group-notes .researcher.'+x).text(data.results[x-1].payload.interviewee);
+						if (data.results[x-1].payload.variable) {
+							$('#group-notes .variable.'+x).text(data.results[x-1].payload.variable);
+						}
+						else {
+							$('#group-notes .variable.'+x).text('');
+						}
+						if (data.results[x-1].payload.notes) {
+							$('#group-notes .notes.'+x).text(data.results[x-1].payload.notes);
+						}
+						else {
+							data.results[x-1].payload.notes;
+						}
+					}
 				}
+				
+/*				$.each($('#group-notes .researcher'), function() {
+					$(this).text('
+				});  */
 			}
 		});
 	}
