@@ -2,15 +2,21 @@
 /*globals Sail, Rollcall, $, Foo */
 
 var EvoRoom = {
-	currentGroupCode: null,
-	currentRainforest: null,
-		
-	rollcallURL: '/rollcall',
+    currentGroupCode: null,
+    currentRainforest: null,
 
-	events: {
-		sail: {
+    rollcallURL: '/rollcall',
 
-		},
+    events: {
+        sail: {
+            /********************************************* INCOMING EVENTS *******************************************/
+
+            location_assignment: function(ev) {
+                //var payload = ev.payload;
+                //payload.go_to_location;
+                //ev.payload.student;
+            }
+        },
 
 		initialized: function(ev) {
 			Sail.app.hidePageElements();
@@ -308,7 +314,7 @@ var EvoRoom = {
 		});
 	},
 	
-/********************************************* EVENTS *******************************************/
+/********************************************* OUTGOING EVENTS *******************************************/
 
 	submitOrganismsPresent: function() {
 		var sev = new Sail.Event('organism_present', {
