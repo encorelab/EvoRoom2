@@ -33,10 +33,14 @@
 	
 <!-- ***********************************************SURVEY**************************************************** -->
 		
+		<div id="loading-page">
+			<div class="wait-text">Loading... please wait</div>
+		</div>
+		
 		<div id="student-chosen-organisms">
 			<!-- TODO remove src and needs to be dynamically, in JS, just not sure where yet (after authenticate?) -->
 			<img class="first-organism organism-image" src="/images/sumatran_orangutan_icon.png" alt="Sumatra Orangutan">		
-			<img class="second-organism organism-image" src="/images/sumatran_rhino_icon.png" alt="Sumatra Rhino">		
+			<img class="second-organism organism-image" src="" alt="Sumatra Rhino">		
 		</div>
 			
 		<div id="log-in-success" class="full-text-box">
@@ -73,7 +77,7 @@
 		<div id="survey-organisms" class="full-text-box">
 			<div class="title">
 				<span><b>Location: </b></span>
-				<span class="location"><b>TEMP FROM QR EVENT</b></span>
+				<span class="location"><b></b></span>
 				<!-- TODO -->
 			</div>
 			
@@ -155,7 +159,7 @@
 			<button class="small-button"><b>Done</b></button>
 		</div>
 		
-		<iframe id="field-guide-frame" class="iframe" src="http://utslearningportfolio.oise.utoronto.ca"></iframe>
+		<iframe id="field-guide-frame" class="iframe" src="http://utslearningportfolio.oise.utoronto.ca/?q=node/437"></iframe>
 		<iframe id="group-page-frame" class="iframe" src="http://utslearningportfolio.oise.utoronto.ca"></iframe>
 		<button id="iframe-close-button">Close</button>
 		
@@ -170,6 +174,7 @@
 	 			<div class="rotation-link">
 					<div class="field-guide-link">Go to the <b>Field Guide</b></div>
 				</div>
+				<button class="small-button">Done</button>
 			</div>
 		</div>
 		
@@ -259,43 +264,47 @@
 		</div>
 		
 		<div id="group-notes">
-			<table class="notes-table">
-				<tr>
-					<th class="table-header-small"><b>Researcher</b></th>
-					<th class="table-header-small"><b>Variable</b></th>
-					<th class="table-header-big"><b>Notes</b></th>
-				</tr>
-				<tr>
-					<td class="researcher first"></td>
-					<td class="variable first"></td>
-					<td class="notes first"></td>
-				</tr>
-				<tr>
-					<td class="researcher second"></td>
-					<td class="variable second"></td>
-					<td class="notes second"></td>
-				</tr>
-				<tr>
-					<td class="researcher third">3</td>
-					<td class="variable third">3</td>
-					<td class="notes third">3</td>
-				</tr>
-				<tr>
-					<td class="researcher fourth">4</td>
-					<td class="variable fourth">4</td>
-					<td class="notes fourth">4</td>
-				</tr>
-				<tr>
-					<td class="researcher fifth">5</td>
-					<td class="variable fifth">5</td>
-					<td class="notes fifth">5</td>
-				</tr>
-				<tr>
-					<td class="researcher sixth">6</td>
-					<td class="variable sixth">6</td>
-					<td class="notes sixth">6</td>
-				</tr>
-			</table>
+			<div class="table-wrapper">
+				<table class="notes-table">
+					<tr>
+						<th class="table-header-small"><b>Researcher</b></th>
+						<th class="table-header-small"><b>Variable</b></th>
+						<th class="table-header-big"><b>Notes</b></th>
+					</tr>
+					<tr>
+						<td class="researcher 1"></td>
+						<td class="variable 1"></td>
+						<td class="notes 1"></td>
+					</tr>
+					<tr>
+						<td class="researcher 2"></td>
+						<td class="variable 2"></td>
+						<td class="notes 2"></td>
+					</tr>
+					<tr>
+						<td class="researcher 3"></td>
+						<td class="variable 3"></td>
+						<td class="notes 3"></td>
+					</tr>
+					<tr>
+						<td class="researcher 4"></td>
+						<td class="variable 4"></td>
+						<td class="notes 4"></td>
+					</tr>
+					<tr>
+						<td class="researcher 5"></td>
+						<td class="variable 5"></td>
+						<td class="notes 5"></td>
+					</tr>
+					<tr>
+						<td class="researcher 6"></td>
+						<td class="variable 6"></td>
+						<td class="notes 6"></td>
+					</tr>
+				</table>
+			</div>
+			
+			<div class="divider"></div>
 
 			<div class="completion-text">
 				<b>Step 3 complete</b>
