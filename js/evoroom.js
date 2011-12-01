@@ -4,6 +4,7 @@
 var EvoRoom = {
     currentGroupCode: null,
     currentRainforest: null,
+    rainforestsCompleted: false,
 
     rollcallURL: '/rollcall',
 
@@ -13,7 +14,7 @@ var EvoRoom = {
             start_step: function(ev) {
               if (ev.payload.step_id) {
                   if (ev.payload.step_id === "step1") {
-                      console.log("We received start_step for step1 - nothing done with it right now!")
+                      console.log("We received start_step for step1 - nothing done with it right now!");
                   }
               }
               else {
@@ -22,8 +23,52 @@ var EvoRoom = {
             },
             
             organisms_assignment: function(ev) {
-                // check if the message is for the current user and group
-                if (Sail.app.currentGroupCode && ev.payload.group_code === Sail.app.currentGroupCode && ev.payload.author === Sail.app.session.account.login) {
+                // check that message is for currently loged in user
+                if (ev.payload.user_name && ev.payload.user_name === Sail.app.session.account.login) {
+                    if (ev.payload.first_organism && ev.payload.second_organism) {
+                        Sail.app.hidePageElements();
+                        // make sure the survey welcome screen come up with the animals received
+                        $('#survey-welcome').show();
+                        // assign right organisms according to event
+                        $('#student-chosen-organisms .first-organism').attr('src', '/images/' + ev.payload.first_organism + '_icon.png');
+                        $('#student-chosen-organisms .second-organism').attr('src', '/images/' + ev.payload.second_organism + '_icon.png');
+                        $('#student-chosen-organisms').show();
+                    }
+                    else {
+                        console.warn("location_assignment event received, but payload is either missing first_organism, second_organism, or both");
+                    }
+                }
+                else {
+                    console.log("organisms_assignment event received but NOT for this user");
+                }
+            },
+            
+            rainforests_completed: function(ev) {
+                if (ev.payload.completed_rainforests) {
+                    Sail.app.hidePageElements();
+                    $('#survey-organisms').show();
+                    // clear radio buttons
+                    $('input:radio').prop('checked', false);
+                    $('#survey-organisms .radio').button('refresh');
+                    
+                    // check if the user already did this rainforest
+                    if ( _.find(ev.payload.completed_rainforests, function (rainforest) { return rainforest === Sail.app.currentRainforest; }) ) {
+                        // show message and disable radio buttons - user must scan again
+                        alert("Rainforest already done! Please scan another rainforest");
+                        $('#survey-organisms .survey-content-box').hide();
+                        rainforestsCompleted = false;
+                        // show the button to scan a rainforest
+                        $('#survey-organisms .next-rainforest').show();
+                    }
+                    // user did all the other forests and is done after this one
+                    else if (ev.payload.completed_rainforests.length >= 3) {
+                        rainforestsCompleted = true;
+                        $('#survey-organisms .survey-content-box').show();
+                    }
+                    else {
+                        rainforestsCompleted = false;
+                        $('#survey-organisms .survey-content-box').show();
+                    }
                     
                 }
                 else {
@@ -112,7 +157,7 @@ var EvoRoom = {
 
 	hidePageElements: function() {
 		$('#loading-page').hide();
-		//$('#log-in-success').hide();
+		$('#log-in-success').hide();
 		$('#survey-welcome').hide();
 		$('#student-chosen-organisms').hide();
 		$('#survey-organisms').hide();
@@ -136,47 +181,27 @@ var EvoRoom = {
 		$('#final-picks-choice').hide();
 		$('#final-picks-debrief').hide();
 	},
-	
-	barcodeScanSuccess: function(result) {
-		alert("Got Barcode: " +result);
-	},
-	
-	barcodeScanFailure: function(msg) {
-	    alert("SCAN FAILED: "+msg);
-	},
 
-	setupPageLayout: function() {
-		var rainforestCounter = 0;		
-		var dateChoice = null;
-		var firstInterview = false;
-		var secondInterview = false;
-		
-		$('.jquery-radios').buttonset();
+    setupPageLayout: function() {
+        $('.jquery-radios').buttonset();
+        
+        $('#log-in-success').show();
 
         $('#log-in-success .big-button').click(function() {
-            $('#log-in-success').hide();
-            $('#survey-welcome').show();
-            $('#student-chosen-organisms').show();
-            // trigger the QR scan screen/module, but what is this scan for?
-            window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccess, Sail.app.barcodeScanFailure);
+            // trigger the QR scan screen/module to scan room entry
+            window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRoomLogin, Sail.app.barcodeScanFailure);
         });
-
-		$('#survey-welcome .big-button').click(function() {
-			$('#survey-welcome').hide();
-			$('#survey-organisms').show();
-			// put the rainforest into currentRainforest;
-
-			// clear radio buttons
-			$('input:radio').prop('checked', false);
-			$('#survey-organisms .radio').button('refresh');
-		});
-		
-		// hide the buttons until user has made all choices on screen
-		// this also needs to check if all of the rainforests are complete, then show small-button instead TODO
-		$('#survey-organisms .radio').click(function() {
-			if ( $('.first-radios').is(':checked') && $('.second-radios').is(':checked') ) {
-				// temp set to 0 instead of 2, for testing
-				if (rainforestCounter >= 0) {
+        
+        $('#survey-welcome .big-button').click(function() {
+            // trigger the QR scan screen/module to scan rainforests
+            window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRainforest, Sail.app.barcodeScanFailure);
+        });
+        
+        // setting up 3 on-click events for survey-organism
+        $('#survey-organisms .radio').click(function() {
+            if ( $('.first-radios').is(':checked') && $('.second-radios').is(':checked') ) {
+				// decission about completion is made in event handler for rainforests_completed
+				if (rainforestsCompleted) {
 					$('#survey-organisms .finished').show();
 				}
 				else {
@@ -184,29 +209,74 @@ var EvoRoom = {
 				}
 			}
 		});
-		// shouldn't there by .hides in the above?
+		
+        // on-click event to scan another rainforest
+        $('#survey-organisms .big-button').click(function() {
+            $('#survey-organisms .next-rainforest').hide();
+            
+            // Caution: we only send the event here to allow the user to change yes/no
+            // only send the organisms_present event if both radio buttons are checked
+            if ( $('.first-radios').is(':checked') && $('.second-radios').is(':checked') ) {
+                Sail.app.submitOrganismsPresent();
+            }
+            
+            // clear radio buttons
+            $('input:radio').prop('checked', false);
+            $('#survey-organisms .radio').button('refresh');
+            
+            // trigger the QR scan screen/module to scan rainforests
+            window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRainforest, Sail.app.barcodeScanFailure);
+        });
 
-		$('#survey-organisms .big-button').click(function() {
-			Sail.app.submitOrganismsPresent();
-			
-			// perform QR scan
+        // on-click event to finish step1
+        $('#survey-organisms .small-button').click(function() {
+            $('#survey-organisms').hide();
+            $('#student-chosen-organisms').hide();
+            
+            // show wait screen and wait for start_step event to show rotation-intro
+            $('#loading-page').show();
 
-			// clear radio buttons
-			$('input:radio').prop('checked', false);
-			$('#survey-organisms .radio').button('refresh');
-			$('#survey-organisms .next-rainforest').hide();
-			
-			// temporary until we can check for all rainforests
-			rainforestCounter = rainforestCounter + 1;
-		});
+            // check agent for which screen to show. Isn't there a better way to do this? Agent will be slow, at least TODO
+            //$('#rotation-intro').show();
+        });
 
-		$('#survey-organisms .small-button').click(function() {
-			$('#survey-organisms').hide();
-			$('#student-chosen-organisms').hide();
+    },
+    
+    barcodeScanSuccessRoomLogin: function(result) {
+        console.log("Got Barcode: " +result);
+        // send out event check_in
+        Sail.app.currentRainforest = result;
+        Sail.app.submitCheckIn();
+        // hide everything
+        Sail.app.hidePageElements();
+        // show waiting page
+        $('#loading-page').show();
+    },
 
-			// check agent for which screen to show. Isn't there a better way to do this? Agent will be slow, at least TODO
-			$('#rotation-intro').show();
-		});
+    barcodeScanFailure: function(msg) {
+        alert("SCAN FAILED: "+msg);
+    },
+    
+    barcodeScanSuccessRainforest: function(result) {
+        console.log("Got Barcode: " +result);
+        // send out event check_in
+        Sail.app.currentRainforest = result;
+        Sail.app.submitCheckIn();
+        // hide everything
+        Sail.app.hidePageElements();
+        // show waiting page
+        $('#loading-page').show();
+    },
+
+
+	TO_BE_RENAMED: function() {
+		var rainforestCounter = 0;		
+		var dateChoice = null;
+		var firstInterview = false;
+		var secondInterview = false;
+		
+		$('.jquery-radios').buttonset();
+
 
 		$('#rotation-intro .big-button').click(function() {
 			$('#rotation-intro').hide();
@@ -337,6 +407,13 @@ var EvoRoom = {
 	},
 	
 /********************************************* OUTGOING EVENTS *******************************************/
+    submitCheckIn: function() {
+        var sev = new Sail.Event('check_in', {
+			group_code:Sail.app.currentGroupCode,
+			rainforest:Sail.app.currentRainforest
+		});
+		EvoRoom.groupchat.sendEvent(sev);
+    },
 
 	submitOrganismsPresent: function() {
 		var sev = new Sail.Event('organism_present', {
