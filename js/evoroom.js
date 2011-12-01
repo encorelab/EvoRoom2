@@ -10,11 +10,34 @@ var EvoRoom = {
     events: {
         sail: {
             /********************************************* INCOMING EVENTS *******************************************/
+            start_step: function(ev) {
+              if (ev.payload.step_id) {
+                  if (ev.payload.step_id === "step1") {
+                      console.log("We received start_step for step1 - nothing done with it right now!")
+                  }
+              }
+              else {
+                  console.warn("start_step event received, but payload contains no step_id");
+              }
+            },
+            
+            organisms_assignment: function(ev) {
+                // check if the message is for the current user and group
+                if (Sail.app.currentGroupCode && ev.payload.group_code === Sail.app.currentGroupCode && ev.payload.author === Sail.app.session.account.login) {
+                    
+                }
+                else {
+                    console.warn("location_assignment event received, but payload is either missing go_to_location, student, or both");
+                }
+            },
 
             location_assignment: function(ev) {
-                //var payload = ev.payload;
-                //payload.go_to_location;
-                //ev.payload.student;
+                if (ev.payload.student && ev.payload.go_to_location) {
+                    
+                }
+                else {
+                    console.warn("location_assignment event received, but payload is either missing go_to_location, student, or both");
+                }
             }
         },
 
@@ -130,14 +153,13 @@ var EvoRoom = {
 		
 		$('.jquery-radios').buttonset();
 
-		$('#log-in-success .big-button').click(function() {
-			$('#log-in-success').hide();
-			$('#survey-welcome').show();
-			$('#student-chosen-organisms').show();
-			// trigger the QR scan screen/module, but what is this scan for?
-			alert("calling scanner now");
-			window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccess, Sail.app.barcodeScanFailure);		
-		});
+        $('#log-in-success .big-button').click(function() {
+            $('#log-in-success').hide();
+            $('#survey-welcome').show();
+            $('#student-chosen-organisms').show();
+            // trigger the QR scan screen/module, but what is this scan for?
+            window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccess, Sail.app.barcodeScanFailure);
+        });
 
 		$('#survey-welcome .big-button').click(function() {
 			$('#survey-welcome').hide();
