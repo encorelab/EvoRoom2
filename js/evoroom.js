@@ -4,7 +4,9 @@
 var EvoRoom = {
     currentGroupCode: null,
     currentRainforest: null,
-    rainforestsCompleted: false,
+    organismsRainforestsCompleted: false,
+    firstRainforestAssigned: false,
+    rotationRainforestsCompleted: false,
 
     rollcallURL: '/rollcall',
 
@@ -21,6 +23,11 @@ var EvoRoom = {
                       Sail.app.hidePageElements();
                       $('#loading-page').show();
                   }
+                  else if (ev.payload.step_id === "step3") {
+                      console.log("We received start_step for step3");
+                      Sail.app.hidePageElements();
+                      $('#loading-page').show();
+                  }
               }
               else {
                   console.warn("start_step event received, but payload contains no step_id");
@@ -28,7 +35,7 @@ var EvoRoom = {
             },
             
             organisms_assignment: function(ev) {
-                // check that message is for currently loged in user
+                // check that message is for currently logged in user
                 if (ev.payload.user_name && ev.payload.user_name === Sail.app.session.account.login) {
                     if (ev.payload.first_organism && ev.payload.second_organism) {
                         Sail.app.hidePageElements();
@@ -61,17 +68,17 @@ var EvoRoom = {
                         // show message and disable radio buttons - user must scan again
                         alert("Rainforest already done! Please scan another rainforest");
                         $('#survey-organisms .survey-content-box').hide();
-                        rainforestsCompleted = false;
+                        organismsRainforestCompleted = false;
                         // show the button to scan a rainforest
                         $('#survey-organisms .next-rainforest').show();
                     }
                     // user did all the other forests and is done after this one
                     else if (ev.payload.completed_rainforests.length >= 3) {
-                        rainforestsCompleted = true;
+                        organismsRainforestCompleted = true;
                         $('#survey-organisms .survey-content-box').show();
                     }
                     else {
-                        rainforestsCompleted = false;
+                        organismsRainforestCompleted = false;
                         $('#survey-organisms .survey-content-box').show();
                     }
                     
@@ -86,26 +93,47 @@ var EvoRoom = {
             location_assignment: function(ev) {
                 if (ev.payload.go_to_location && ev.payload.student === Sail.app.session.account.login) {
                 	Sail.app.hidePageElements();
-                	$('#rotation-intro .current-rainforest').text(ev.payload.go_to_location);
-                	$('#rotation-intro').show();
+                	// update the value for current rainforest (also used later in task_assignment
+                	Sail.app.currentRainforest = ev.payload.go_to_location;
+                	if (Sail.app.firstRainforestAssigned) {
+                		$('#rotation-next-rainforest .next-rainforest').text(Sail.app.currentRainforest);
+                		$('#rotation-next-rainforest').show();
+                	}
+                	else {
+	                	$('#rotation-intro .current-rainforest').text(Sail.app.currentRainforest);
+	                	$('#rotation-intro').show();
+	                	Sail.app.firstRainforestAssigned = true;
+                	}
                 }
                 else {
                     console.warn("location_assignment event received, but payload is either missing go_to_location, student, or both");
                 }
-                // we need to build something in for wrong location checkin
+                // we need to build something in for wrong location check-in... some kind of popup? TODO But won't be here
             },
             
             task_assignment: function(ev) {
-            	if (ev.payload.student === Sail.app.session.account.login) {
-                	// if it's relevant to this student
-                    if (ev.payload.student === Sail.app.session.account.login) {
-                    	Sail.app.hidePageElements();
-                    	$('#rotation-intro .current-rainforest').text(ev.payload.go_to_location);
-                    	$('#rotation-intro').show();
-                    }
+            	if (ev.payload.task && ev.payload.student === Sail.app.session.account.login) {
+                	Sail.app.hidePageElements();
+                	if (ev.payload.task === "scribe") {
+                		$('#rotation-note-taker .current-rainforest').text(Sail.app.currentRainforest);
+                		$('#rotation-note-taker').show();
+                	}
+                	else if (ev.payload.task === "guide_looker_upper") {
+                		$('#rotation-field-guide .current-rainforest').text(Sail.app.currentRainforest);
+                		$('#rotation-field-guide').show();
+                	}
+                	else if (ev.payload.task === "prediction_looker_upper") {
+                		$('#rotation-prediction .current-rainforest').text(Sail.app.currentRainforest);
+                		$('#rotation-prediction').show();
+                	}
+                	else if (ev.payload.task === "guide_prediction_looker_upper") {
+                		alert("we will need to figure this out");		// TODO look this up, talk to Mich? 
+                		$('#rotation-field-guide .current-rainforest').text(Sail.app.currentRainforest);
+                		$('#rotation-field-guide').show();
+                	}
                 }
                 else {
-                    console.warn("location_assignment event received, but payload is either missing go_to_location, student, or both");
+                    console.warn("task_assignment event received, but payload is incomplete");
                 }
             }
             
@@ -234,7 +262,7 @@ var EvoRoom = {
         $('#survey-organisms .radio').click(function() {
             if ( $('.first-radios').is(':checked') && $('.second-radios').is(':checked') ) {
 				// decission about completion is made in event handler for rainforests_completed
-				if (rainforestsCompleted) {
+				if (organismsRainforestCompleted) {
 					$('#survey-organisms .finished').show();
 				}
 				else {
@@ -245,7 +273,7 @@ var EvoRoom = {
 		
         // on-click event to scan another rainforest
         $('#survey-organisms .big-button').click(function() {
-            $('#survey-organisms .next-rainforest').hide();
+            Sail.app.hidePageElements();
             
             // Caution: we only send the event here to allow the user to change yes/no
             // only send the organisms_present event if both radio buttons are checked
@@ -263,18 +291,60 @@ var EvoRoom = {
 
         // on-click event to finish step1
         $('#survey-organisms .small-button').click(function() {
-            $('#survey-organisms').hide();
-            $('#student-chosen-organisms').hide();
+        	Sail.app.hidePageElements();
             
             // show wait screen and wait for start_step event to show rotation-intro
             $('#loading-page').show();
-
         });
 
 /*************************************STEP 2***********************************************/
         
 		$('#rotation-intro .big-button').click(function() {
 			// QR scan at assigned rainforest
+			window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRainforest, Sail.app.barcodeScanFailure);
+		});
+		
+		// notetaker submits whether they think this is their rainforest
+		$('#rotation-note-taker .small-button').click(function() {
+			Sail.app.submitRainforestGuess();
+			Sail.app.hidePageElements();
+			$('#loading-page').show();
+		});
+		
+/*		$('#rotation-field-guide .small-button').click(function() {
+			Sail.app.hidePageElements();
+			$('#rotation-next-rainforest').show();
+		});
+
+		$('#rotation-prediction .small-button').click(function() {
+			Sail.app.hidePageElements();
+			$('#rotation-next-rainforest').show();
+		});*/
+		
+		// wiring in the stuff for iframes
+		$('#rotation-field-guide .field-guide-link').click(function() {
+			$('#field-guide-frame').show();
+			$('#field-guide-frame').appendTo('#rotation-field-guide');
+			$('#iframe-close-button').show();
+			$('#iframe-close-button').appendTo('#rotation-field-guide');
+		});
+
+		// wiring in the stuff for iframes
+		$('#rotation-prediction .group-page-link').click(function() {
+			$('#group-page-frame').show();
+			$('#group-page-frame').appendTo('#rotation-prediction');
+			$('#iframe-close-button').show();
+			$('#iframe-close-button').appendTo('#rotation-prediction');
+		});		
+		
+		// wiring in the stuff for iframes
+		$('#iframe-close-button').click(function() {
+			$('.iframe').hide();
+			$('#iframe-close-button').hide();
+		});
+		
+		$('#rotation-next-rainforest .big-button').click(function() {
+			Sail.app.hidePageElements();
 			window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRainforest, Sail.app.barcodeScanFailure);
 		});
 		
@@ -320,66 +390,10 @@ var EvoRoom = {
 		var firstInterview = false;
 		var secondInterview = false;
 		
-		$('.jquery-radios').buttonset();
 
 
-		$('#rotation-intro .big-button').click(function() {
-			$('#rotation-intro').hide();
-			// check which rainforest is next
-			// check which role is next
-			// doing them in order for now
-			// check agent for which screen to show next TODO
-			$('#rotation-note-taker').show();
-		});
 
-		// this will be removed eventually TODO
-		$('#rotation-note-taker .small-button').click(function() {
-			Sail.app.submitRainforestGuess();
 
-			$('#rotation-note-taker').hide();
-			// check agent for which screen to show next TODO
-			$('#rotation-field-guide').show();
-		});
-
-		// this will be removed eventually TODO
-		$('#rotation-field-guide .small-button').click(function() {
-			$('#rotation-field-guide').hide();
-			// check agent for which screen to show next TODO
-			$('#rotation-next-rainforest').show();
-		});
-/*
-		// this will be removed eventually TODO
-		$('#rotation-prediction .small-button').click(function() {
-			$('#rotation-prediction').hide();
-			// check agent for which screen to show next TODO
-			$('#rotation-next-rainforest').show();
-		});*/
-
-		$('#rotation-field-guide .field-guide-link').click(function() {
-			$('#field-guide-frame').show();
-			$('#field-guide-frame').appendTo('#rotation-field-guide');
-			$('#iframe-close-button').show();
-			$('#iframe-close-button').appendTo('#rotation-field-guide');
-		});
-		
-		$('#rotation-prediction .group-page-link').click(function() {
-			$('#group-page-frame').show();
-			$('#group-page-frame').appendTo('#rotation-prediction');
-			$('#iframe-close-button').show();
-			$('#iframe-close-button').appendTo('#rotation-prediction');
-		});
-		
-		$('#iframe-close-button').click(function() {
-			$('.iframe').hide();
-			$('#iframe-close-button').hide();
-		});
-		
-		$('#rotation-next-rainforest .big-button').click(function() {
-			// QR scan TODO
-			$('#rotation-next-rainforest').hide();
-			$('#interview-intro').show();
-			// add waiting screen TODO
-		});
 		
 		$('#interview-intro .first-date').click(function() {
 			$('#interview-intro').hide();
