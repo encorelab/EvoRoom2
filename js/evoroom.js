@@ -19,15 +19,15 @@ var EvoRoom = {
             start_step: function(ev) {
                 if (ev.payload.user_name && ev.payload.user_name === Sail.app.session.account.login) {
                     if (ev.payload.step_id) {
-                        if (ev.payload.step_id === "step1") {
+                        if (ev.payload.step_id === "STEP_1") {
                           console.log("We received start_step for step1 - nothing done with it right now!");
                         }
-                        else if (ev.payload.step_id === "step2") {
+                        else if (ev.payload.step_id === "STEP_2") {
                           console.log("We received start_step for step2");
                           Sail.app.hidePageElements();
                           $('#loading-page').show();
                         }
-                        else if (ev.payload.step_id === "step3") {
+                        else if (ev.payload.step_id === "STEP_3") {
                           console.log("We received start_step for step3");
                           Sail.app.hidePageElements();
                           $('#loading-page').show();
@@ -64,7 +64,7 @@ var EvoRoom = {
             },
             
             rainforests_completed_announcement: function(ev) {
-                if (ev.payload.completed_rainforests) {
+                if (ev.payload.completed_rainforests && ev.payload.user_name === Sail.app.session.account.login) {
                     Sail.app.hidePageElements();
                     $('#survey-organisms').show();
                     // clear radio buttons
