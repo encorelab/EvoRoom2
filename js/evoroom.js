@@ -6,6 +6,7 @@ var EvoRoom = {
     currentRainforest: null,
     organismsRainforestsCompleted: false,
     firstRainforestAssigned: false,
+    targetRainforest: null,
     rotationRainforestsCompleted: false,
 
     rollcallURL: '/rollcall',
@@ -55,7 +56,7 @@ var EvoRoom = {
                 }
             },
             
-            rainforests_completed: function(ev) {
+            rainforests_completed_announcement: function(ev) {
                 if (ev.payload.completed_rainforests) {
                     Sail.app.hidePageElements();
                     $('#survey-organisms').show();
@@ -81,7 +82,7 @@ var EvoRoom = {
                         organismsRainforestCompleted = false;
                         $('#survey-organisms .survey-content-box').show();
                     }
-                    
+                   
                 }
                 else {
                     console.warn("location_assignment event received, but payload is either missing go_to_location, student, or both");
@@ -93,14 +94,14 @@ var EvoRoom = {
             location_assignment: function(ev) {
                 if (ev.payload.go_to_location && ev.payload.student === Sail.app.session.account.login) {
                 	Sail.app.hidePageElements();
-                	// update the value for current rainforest (also used later in task_assignment
-                	Sail.app.currentRainforest = ev.payload.go_to_location;
+                	Sail.app.targetRainforest = ev.payload.go_to_location;
+                    
                 	if (Sail.app.firstRainforestAssigned) {
-                		$('#rotation-next-rainforest .next-rainforest').text(Sail.app.currentRainforest);
+                		$('#rotation-next-rainforest .next-rainforest').text(Sail.app.formatRainforestString(Sail.app.targetRainforest));
                 		$('#rotation-next-rainforest').show();
                 	}
                 	else {
-	                	$('#rotation-intro .current-rainforest').text(Sail.app.currentRainforest);
+	                	$('#rotation-intro .current-rainforest').text(Sail.app.formatRainforestString(Sail.app.targetRainforest));
 	                	$('#rotation-intro').show();
 	                	Sail.app.firstRainforestAssigned = true;
                 	}
@@ -108,28 +109,31 @@ var EvoRoom = {
                 else {
                     console.warn("location_assignment event received, but payload is either missing go_to_location, student, or both");
                 }
-                // we need to build something in for wrong location check-in... some kind of popup? TODO But won't be here
             },
             
             task_assignment: function(ev) {
             	if (ev.payload.task && ev.payload.student === Sail.app.session.account.login) {
                 	Sail.app.hidePageElements();
+                	// clear all fields
+                	$('#rotation-note-taker .rainforest-explanation-text-entry').text('');
+                    $('input:radio').prop('checked', false);
+                    $('#rotation-note-taker .radio').button('refresh');
+                    
                 	if (ev.payload.task === "scribe") {
-                		$('#rotation-note-taker .current-rainforest').text(Sail.app.currentRainforest);
+                		$('#rotation-note-taker .current-rainforest').text(Sail.app.formatRainforestString(Sail.app.currentRainforest));
                 		$('#rotation-note-taker').show();
                 	}
                 	else if (ev.payload.task === "guide_looker_upper") {
-                		$('#rotation-field-guide .current-rainforest').text(Sail.app.currentRainforest);
+                		$('#rotation-field-guide .current-rainforest').text(Sail.app.formatRainforestString(Sail.app.currentRainforest));
                 		$('#rotation-field-guide').show();
                 	}
                 	else if (ev.payload.task === "prediction_looker_upper") {
-                		$('#rotation-prediction .current-rainforest').text(Sail.app.currentRainforest);
+                		$('#rotation-prediction .current-rainforest').text(Sail.app.formatRainforestString(Sail.app.currentRainforest));
                 		$('#rotation-prediction').show();
                 	}
                 	else if (ev.payload.task === "guide_prediction_looker_upper") {
-                		alert("we will need to figure this out");		// TODO look this up, talk to Mich? 
-                		$('#rotation-field-guide .current-rainforest').text(Sail.app.currentRainforest);
-                		$('#rotation-field-guide').show();
+                		$('#rotation-field-guide .current-rainforest').text(Sail.app.formatRainforestString(Sail.app.currentRainforest));
+                		$('#rotation-field-guide-and-prediction').show();
                 	}
                 }
                 else {
@@ -227,9 +231,10 @@ var EvoRoom = {
 		$('#rotation-note-taker').hide();
 		$('#rotation-field-guide').hide();
 		$('#field-guide-frame').hide();
+		$('#rotation-prediction').hide();
+		$('#rotation-field-guide-and-prediction').hide();
 		$('#group-page-frame').hide();
 		$('#iframe-close-button').hide();
-		$('#rotation-prediction').hide();
 		$('#rotation-next-rainforest').hide();
 		$('#interview-intro').hide();
 		$('#interview').hide();
@@ -262,7 +267,7 @@ var EvoRoom = {
         $('#survey-organisms .radio').click(function() {
             if ( $('.first-radios').is(':checked') && $('.second-radios').is(':checked') ) {
 				// decission about completion is made in event handler for rainforests_completed
-				if (organismsRainforestCompleted) {
+				if (Sail.app.organismsRainforestCompleted) {
 					$('#survey-organisms .finished').show();
 				}
 				else {
@@ -301,7 +306,7 @@ var EvoRoom = {
         
 		$('#rotation-intro .big-button').click(function() {
 			// QR scan at assigned rainforest
-			window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRainforest, Sail.app.barcodeScanFailure);
+			window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessCheckLocationAssignment, Sail.app.barcodeScanFailure);
 		});
 		
 		// notetaker submits whether they think this is their rainforest
@@ -310,16 +315,6 @@ var EvoRoom = {
 			Sail.app.hidePageElements();
 			$('#loading-page').show();
 		});
-		
-/*		$('#rotation-field-guide .small-button').click(function() {
-			Sail.app.hidePageElements();
-			$('#rotation-next-rainforest').show();
-		});
-
-		$('#rotation-prediction .small-button').click(function() {
-			Sail.app.hidePageElements();
-			$('#rotation-next-rainforest').show();
-		});*/
 		
 		// wiring in the stuff for iframes
 		$('#rotation-field-guide .field-guide-link').click(function() {
@@ -335,7 +330,23 @@ var EvoRoom = {
 			$('#group-page-frame').appendTo('#rotation-prediction');
 			$('#iframe-close-button').show();
 			$('#iframe-close-button').appendTo('#rotation-prediction');
-		});		
+		});
+		
+		// wiring in the stuff for iframes
+		$('#rotation-field-guide-and-prediction .field-guide-link').click(function() {
+			$('#field-guide-frame').show();
+			$('#field-guide-frame').appendTo('#rotation-field-guide-and-prediction');
+			$('#iframe-close-button').show();
+			$('#iframe-close-button').appendTo('#rotation-field-guide-and-prediction');
+		});
+
+		// wiring in the stuff for iframes
+		$('#rotation-field-guide-and-prediction .group-page-link').click(function() {
+			$('#group-page-frame').show();
+			$('#group-page-frame').appendTo('#rotation-field-guide-and-prediction');
+			$('#iframe-close-button').show();
+			$('#iframe-close-button').appendTo('#rotation-field-guide-and-prediction');
+		});	
 		
 		// wiring in the stuff for iframes
 		$('#iframe-close-button').click(function() {
@@ -345,7 +356,7 @@ var EvoRoom = {
 		
 		$('#rotation-next-rainforest .big-button').click(function() {
 			Sail.app.hidePageElements();
-			window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRainforest, Sail.app.barcodeScanFailure);
+			window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessCheckLocationAssignment, Sail.app.barcodeScanFailure);
 		});
 		
 		
@@ -377,6 +388,24 @@ var EvoRoom = {
         Sail.app.hidePageElements();
         // show waiting page
         $('#loading-page').show();
+    },
+    
+    barcodeScanSuccessCheckLocationAssignment: function(result) {
+        console.log("Got Barcode: " +result);
+        // hide everything
+        Sail.app.hidePageElements();
+        // check if they are at the correct place
+        if (Sail.app.targetRainforest === result) {
+        	Sail.app.currentRainforest = result;
+            Sail.app.submitCheckIn();
+            $('#loading-page').show();
+        }
+        // alert and send them back to the 5th screen
+        else {
+        	alert ("You are at the wrong location, please scan again at the correct location");
+        	$('#rotation-next-rainforest').show();
+        }
+
     },
     
     barcodeScanFailure: function(msg) {
@@ -575,12 +604,25 @@ var EvoRoom = {
 						}
 					}
 				}
-				
-/*				$.each($('#group-notes .researcher'), function() {
-					$(this).text('
-				});  */
 			}
 		});
+	},
+	
+	formatRainforestString: function(rainforestString) {
+		if (rainforestString === "rainforest_a") {
+			return "Rainforest A";
+		}
+		else if (rainforestString === "rainforest_b") {
+			return "Rainforest B";
+		}
+		else if (rainforestString === "rainforest_c") {
+			return "Rainforest C";
+		}
+		else if (rainforestString === "rainforest_d") {
+			return "Rainforest D";
+		}
+		else {
+			return "unknown rainforest";
+		}
 	}
-
 };
