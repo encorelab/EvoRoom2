@@ -5,7 +5,7 @@ require 'event_logger'
 require 'location_tracker'
 
 AGENT_PASSWORD = "9186ebc4790dfba833826e13c42c885f6f847274" # s3agent!
-RUN = "michelle-fall-2011-matt"
+RUN = "michelle-fall-2011"
 DB = "evoroom"
 
 @daemon = Sail::Daemon.spawn(
