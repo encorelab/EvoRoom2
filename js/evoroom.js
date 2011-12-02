@@ -523,7 +523,7 @@ var EvoRoom = {
 		var sev = new Sail.Event('organism_present', {
 			group_code:Sail.app.currentGroupCode,
 			author:Sail.app.session.account.login,
-			rainforest:Sail.app.currentRainforest,
+			location:Sail.app.currentRainforest,
 			first_organism:{
 				organism:$('#survey-organisms .first-organism').val(),
 				present:$('input:radio[name=first-organism-yn]:checked').val()
