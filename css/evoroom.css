@@ -122,7 +122,7 @@
 /*************************************TO BE MOVED?****************************************/
 
 #rotation-note-taker .rainforest-choice {
-	margin-top: 50px;
+	margin-top: 35px;
 }
 
 #rotation-note-taker .rainforest-choice-radios {
@@ -159,7 +159,7 @@
 #iframe-close-button {
 	position: absolute;
 	top: 3px;
-	right: 4px;
+	right: 120px;
 	width: 80px;
 	height: 30px;
 	display: table;
