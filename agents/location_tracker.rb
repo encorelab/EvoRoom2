@@ -41,10 +41,6 @@ class LocationTracker < Sail::Agent
         client.write iq
       end
     end
-    
-    message :type => :error do |stanza|
-      log stanza, :ERROR
-    end
   end
   
   def check_in_user_at(username, location, timestamp = nil)
