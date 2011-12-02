@@ -3,8 +3,6 @@ require 'blather/client/dsl'
 require 'json'
 require 'mongo'
 
-require 'ruby-debug'
-
 $: << 'sail.rb/lib'
 require 'sail/agent'
 
@@ -13,13 +11,12 @@ class EventLogger < Sail::Agent
     when_ready do
       @mongo = Mongo::Connection.new.db(config[:database])
       
-      pres = Blather::Stanza::Presence::Status.new
-      pres.to = agent_jid_in_room
-      pres.state = :chat
-      
-      log "Joining #{agent_jid_in_room.inspect}..."
-      
-      client.write(pres)
+      join_room
+      join_log_room
+    end
+    
+    self_joined_log_room do |stanza|
+      groupchat_logger_ready!
     end
     
     # we don't specify an event type, so this will catch ALL events
@@ -27,5 +24,20 @@ class EventLogger < Sail::Agent
       log "Storing event: #{data.inspect}"
       @mongo.collection('events').save(data)
     end
+    
+    # event :check_in? do |stanza, data|
+    #   iq = Sail::Query.new(:get)
+    #   iq.query << "latest_user_locations"
+    #   #iq.from = agent_jid_in_room
+    #   iq.to = room_jid + "/LocationTracker"
+    #   
+    #   log "SENDING REQUEST #{client.object_id}: " + iq.inspect
+    #   
+    #   client.write_with_handler(iq) do |stanza|
+    #     log "GOT RESPONSE #{client.object_id}: " + stanza.inspect
+    #   end
+    #   
+    #   log client.instance_variable_get(:@tmp_handlers).inspect
+    # end
   end
 end

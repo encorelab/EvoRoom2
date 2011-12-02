@@ -8,6 +8,8 @@ var EvoRoom = {
     firstRainforestAssigned: false,
     targetRainforest: null,
     rotationRainforestsCompleted: false,
+    firstInterview: false,
+    secondInterview: false,
 
     rollcallURL: '/rollcall',
 
@@ -15,24 +17,29 @@ var EvoRoom = {
         sail: {
             /********************************************* INCOMING EVENTS *******************************************/
             start_step: function(ev) {
-              if (ev.payload.step_id) {
-                  if (ev.payload.step_id === "step1") {
-                      console.log("We received start_step for step1 - nothing done with it right now!");
-                  }
-                  else if (ev.payload.step_id === "step2") {
-                      console.log("We received start_step for step2");
-                      Sail.app.hidePageElements();
-                      $('#loading-page').show();
-                  }
-                  else if (ev.payload.step_id === "step3") {
-                      console.log("We received start_step for step3");
-                      Sail.app.hidePageElements();
-                      $('#loading-page').show();
-                  }
-              }
-              else {
-                  console.warn("start_step event received, but payload contains no step_id");
-              }
+                if (ev.payload.user_name && ev.payload.user_name === Sail.app.session.account.login) {
+                    if (ev.payload.step_id) {
+                        if (ev.payload.step_id === "step1") {
+                          console.log("We received start_step for step1 - nothing done with it right now!");
+                        }
+                        else if (ev.payload.step_id === "step2") {
+                          console.log("We received start_step for step2");
+                          Sail.app.hidePageElements();
+                          $('#loading-page').show();
+                        }
+                        else if (ev.payload.step_id === "step3") {
+                          console.log("We received start_step for step3");
+                          Sail.app.hidePageElements();
+                          $('#loading-page').show();
+                        }
+                    }
+                    else {
+                      console.warn("start_step event received, but payload contains no step_id");
+                    }
+                }
+                else {
+                    console.log("start_step event received, but not for this user");
+                }
             },
             
             organisms_assignment: function(ev) {
@@ -139,11 +146,28 @@ var EvoRoom = {
                 else {
                     console.warn("task_assignment event received, but payload is incomplete");
                 }
-            }
+            },
             
 /*****************************************EVENTS ADDED FOR STEP 3***********************************************/
-            
-            
+            interviewees_assigned: function(ev) {
+                if (ev.payload.user_name && ev.payload.user_name === Sail.app.session.account.login) {
+                    if (ev.payload.first_interviewee && ev.payload.second_interviewee) {
+                        Sail.app.hidePageElements();
+                        // set up first interviewee
+                        $('#interview-intro .first-interviewee').text(ev.payload.first_interviewee);
+                        // set up second interviewee
+                        $('#interview-intro .second-interviewee').text(ev.payload.second_interviewee);
+                        
+                        $('#interview-intro').show();
+                    }
+                    else {
+                        console.warn("interviewees_assigned event received, but payload is incomplete");
+                    }
+                }
+                else {
+                    console.log("interviewees_assigned event received, but not for this user");
+                }
+            }
             
 /*****************************************EVENTS ADDED FOR STEP 4***********************************************/            
             
@@ -361,9 +385,53 @@ var EvoRoom = {
 		
 		
 /**************************************STEP 3***********************************************/	
-		
-		
-		
+        $('#interview-intro .first-interviewee').click(function() {
+            $('#interview .interview-choice').text($('#interview-intro .first-interviewee').text());
+            $('#interview-intro').hide();
+            $('#interview').show();
+            
+            Sail.app.firstInterview = true;
+            Sail.app.startInterview();
+        });
+
+        $('#interview-intro .second-interviewee').click(function() {
+            $('#interview .interview-choice').text($('#interview-intro .second-interviewee').text());
+            $('#interview-intro').hide();
+            $('#interview').show();
+
+            Sail.app.secondInterview = true;
+            Sail.app.startInterview();
+        });
+        
+        // this might be a: sloppy, b: dangerous (will they *always* have exactly 2 interviews?). Is there a better approach?
+        $('#interview .small-button').click(function() {
+            if (Sail.app.firstInterview && Sail.app.secondInterview) {
+                Sail.app.submitInterview();
+
+                $('#interview').hide();
+                $('#group-notes').show();
+                // grab stuff from db, populate .notes-table .first + .second TODO
+            }
+            else {
+                Sail.app.submitInterview();
+                
+                $('#interview .variable-dropdown').val('');
+                $('#interview .interview-content-text-entry').val('');
+                
+                $('#interview').hide();
+                $('#interview-intro').show();
+            }
+        });
+        
+        $('#group-notes .sync-button').click(function() {
+            Sail.app.getInterviews();
+        });
+        
+        $('#group-notes .small-button').click(function() {
+            $('#group-notes').hide();
+            $('#final-picks-ranking').show();
+        });
+
 /**************************************STEP 4***********************************************/		
 
     },
@@ -415,61 +483,9 @@ var EvoRoom = {
 
 	TO_BE_RENAMED: function() {
 		var rainforestCounter = 0;		
-		var dateChoice = null;
-		var firstInterview = false;
-		var secondInterview = false;
-		
-
-
 
 
 		
-		$('#interview-intro .first-date').click(function() {
-			$('#interview-intro').hide();
-			$('#interview').show();
-			dateChoice = $('#interview-intro .first-date').text();
-			$('#interview .interview-choice').text(dateChoice);
-			firstInterview = true;
-			Sail.app.startInterview();
-		});
-		
-		$('#interview-intro .second-date').click(function() {
-			$('#interview-intro').hide();
-			$('#interview').show();
-			dateChoice = $('#interview-intro .second-date').text();
-			$('#interview .interview-choice').text(dateChoice);
-			secondInterview = true;
-			Sail.app.startInterview();
-		});
-
-		// this might be a: sloppy, b: dangerous (will they *always* have exactly 2 interviews?). Is there a better approach?
-		$('#interview .small-button').click(function() {
-			if (firstInterview && secondInterview) {
-				Sail.app.submitInterview();
-
-				$('#interview').hide();
-				$('#group-notes').show();
-				// grab stuff from db, populate .notes-table .first + .second TODO
-			}
-			else {
-				Sail.app.submitInterview();
-				
-				$('#interview .variable-dropdown').val('');
-				$('#interview .interview-content-text-entry').val('');
-				
-				$('#interview').hide();
-				$('#interview-intro').show();
-			}
-		});
-
-		$('#group-notes .sync-button').click(function() {
-			Sail.app.getInterviews();
-		});
-
-		$('#group-notes .small-button').click(function() {
-			$('#group-notes').hide();
-			$('#final-picks-ranking').show();
-		});
 
 		$('#final-picks-ranking .small-button').click(function() {
 			Sail.app.submitRankings();
