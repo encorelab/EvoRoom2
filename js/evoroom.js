@@ -16,6 +16,11 @@ var EvoRoom = {
                   if (ev.payload.step_id === "step1") {
                       console.log("We received start_step for step1 - nothing done with it right now!");
                   }
+                  else if (ev.payload.step_id === "step2") {
+                      console.log("We received start_step for step2");
+                      Sail.app.hidePageElements();
+                      $('#loading-page').show();
+                  }
               }
               else {
                   console.warn("start_step event received, but payload contains no step_id");
@@ -76,14 +81,41 @@ var EvoRoom = {
                 }
             },
 
+/*****************************************EVENTS ADDED FOR STEP 2***********************************************/            
+            
             location_assignment: function(ev) {
-                if (ev.payload.student && ev.payload.go_to_location) {
-                    
+                if (ev.payload.go_to_location && ev.payload.student === Sail.app.session.account.login) {
+                	Sail.app.hidePageElements();
+                	$('#rotation-intro .current-rainforest').text(ev.payload.go_to_location);
+                	$('#rotation-intro').show();
+                }
+                else {
+                    console.warn("location_assignment event received, but payload is either missing go_to_location, student, or both");
+                }
+                // we need to build something in for wrong location checkin
+            },
+            
+            task_assignment: function(ev) {
+            	if (ev.payload.student === Sail.app.session.account.login) {
+                	// if it's relevant to this student
+                    if (ev.payload.student === Sail.app.session.account.login) {
+                    	Sail.app.hidePageElements();
+                    	$('#rotation-intro .current-rainforest').text(ev.payload.go_to_location);
+                    	$('#rotation-intro').show();
+                    }
                 }
                 else {
                     console.warn("location_assignment event received, but payload is either missing go_to_location, student, or both");
                 }
             }
+            
+/*****************************************EVENTS ADDED FOR STEP 3***********************************************/
+            
+            
+            
+/*****************************************EVENTS ADDED FOR STEP 4***********************************************/            
+            
+            
         },
 
 		initialized: function(ev) {
@@ -176,6 +208,7 @@ var EvoRoom = {
 		$('#group-notes').hide();
 		$('#final-picks-ranking').hide();
 		$('#final-picks-discuss').hide();
+		//$('#final-picks-discuss .question1').hide();
 		$('#final-picks-discuss .question2').hide();
 		$('#final-picks-discuss .question3').hide();
 		$('#final-picks-choice').hide();
@@ -236,9 +269,21 @@ var EvoRoom = {
             // show wait screen and wait for start_step event to show rotation-intro
             $('#loading-page').show();
 
-            // check agent for which screen to show. Isn't there a better way to do this? Agent will be slow, at least TODO
-            //$('#rotation-intro').show();
         });
+
+/*************************************STEP 2***********************************************/
+        
+		$('#rotation-intro .big-button').click(function() {
+			// QR scan at assigned rainforest
+			window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRainforest, Sail.app.barcodeScanFailure);
+		});
+		
+		
+/**************************************STEP 3***********************************************/	
+		
+		
+		
+/**************************************STEP 4***********************************************/		
 
     },
     
@@ -252,10 +297,6 @@ var EvoRoom = {
         // show waiting page
         $('#loading-page').show();
     },
-
-    barcodeScanFailure: function(msg) {
-        alert("SCAN FAILED: "+msg);
-    },
     
     barcodeScanSuccessRainforest: function(result) {
         console.log("Got Barcode: " +result);
@@ -266,6 +307,10 @@ var EvoRoom = {
         Sail.app.hidePageElements();
         // show waiting page
         $('#loading-page').show();
+    },
+    
+    barcodeScanFailure: function(msg) {
+        alert("SCAN FAILED: "+msg);
     },
 
 
