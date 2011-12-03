@@ -56,6 +56,21 @@
 	border: 1px solid #007ADF;	
 }
 
+.small-error-resolver-button {
+	/*position: absolute;*/
+	/*bottom: 160px;*/
+	/*left: 50%;*/
+	/*margin-left: -70px;*/
+	/*width: 140px;*/
+	margin-top: 20px;
+	height: 60px;
+	font-size: 28px;
+	color: white;
+	background: url('');
+	background-color: #007ADF;
+	border: 1px solid #007ADF;	
+}
+
 .small-button {
 	position: absolute;
 	bottom: 80px;
