@@ -64,7 +64,7 @@ var EvoRoom = {
 			rainforests_completed_announcement: function(ev) {
 				if (ev.payload.completed_rainforests && ev.payload.user_name === Sail.app.session.account.login) {
 					Sail.app.hidePageElements();
-					$('#survey-organisms .location').text(Sail.app.formatRainforestString(currentRainforest));
+					$('#survey-organisms .location').text(Sail.app.formatRainforestString(Sail.app.currentRainforest));
 					//$('#survey-organisms').show();
 					// clear radio buttons
 					$('input:radio').prop('checked', false);
@@ -86,6 +86,8 @@ var EvoRoom = {
 						Sail.app.organismsRainforestCompleted = false;
 						$('#survey-organisms .survey-content-box').show();
 					}
+					
+					$('#survey-organisms').show();
 
 				} else {
 					console.warn("location_assignment event received, but payload is either missing go_to_location, student, or both");
