@@ -42,6 +42,20 @@
 	border: 1px solid #007ADF;	
 }
 
+.big-error-resolver-button {
+	position: absolute;
+	bottom: 160px;
+	left: 50%;
+	margin-left: -170px;	
+	width: 340px;
+	height: 60px;
+	font-size: 28px;
+	color: white;
+	background: url('');
+	background-color: #007ADF;
+	border: 1px solid #007ADF;	
+}
+
 .small-button {
 	position: absolute;
 	bottom: 80px;
