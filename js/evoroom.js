@@ -20,15 +20,19 @@ var EvoRoom = {
                 if (ev.payload.user_name && ev.payload.user_name === Sail.app.session.account.login) {
                     if (ev.payload.step_id) {
                         if (ev.payload.step_id === "STEP_1") {
-                            console.log("We received start_step for step1 - nothing done with it right now!");
+                            console.log("Received start_step for step1 - nothing done with it right now!");
                         } else if (ev.payload.step_id === "STEP_2") {
-                            console.log("We received start_step for step2");
+                            console.log("Received start_step for step2");
                             Sail.app.hidePageElements();
                             $('#loading-page').show();
                         } else if (ev.payload.step_id === "STEP_3") {
-                            console.log("We received start_step for step3");
+                            console.log("Received start_step for step3");
                             Sail.app.hidePageElements();
                             $('#loading-page').show();
+                        } else if (ev.payload.step_id === "STEP_4") {
+                            console.log("Received start_step for step4");
+                            Sail.app.hidePageElements();
+                            $('#group-notes').show();
                         }
                     } else {
                         console.warn("start_step event received, but payload contains no step_id");
@@ -140,8 +144,9 @@ var EvoRoom = {
             },
 
             /*****************************************EVENTS ADDED FOR STEP 3***********************************************/
+
             interviewees_assigned: function(ev) {
-                if (ev.payload.user_name && ev.payload.user_name === Sail.app.session.account.login) {
+                if (ev.payload.user_name && ev.payload.user_name === Sail.app.session.account.login) {       // this is a little strange. Is this intentional?
                     if (ev.payload.first_interviewee && ev.payload.second_interviewee) {
                         Sail.app.hidePageElements();
                         // set up first interviewee
@@ -158,10 +163,34 @@ var EvoRoom = {
                 else {
                     console.log("interviewees_assigned event received, but not for this user");
                 }
-            }
+            },
 
             /*****************************************EVENTS ADDED FOR STEP 4***********************************************/            
 
+            rationale_assigned: function(ev) {
+                if (ev.payload.question && ev.payload.user_name === Sail.app.session.account.login) {
+                    Sail.app.hidePageElements();
+                    
+                    // show the question assigned to this student
+                    if (ev.payload.question === "1") {
+                    	$('#final-picks-discuss .question1').show();
+                    }
+                    else if (ev.payload.question === "2") {
+                    	$('#final-picks-discuss .question2').show();
+                    }
+                    else if (ev.payload.question === "3") {
+                    	$('#final-picks-discuss .question3').show();
+                    }
+                    else {
+                    	alert("agent error. Please reconnect");
+                    }
+                    
+                    $('#final-picks-discuss').show();
+                }
+                else {
+                    console.log("rationale_assigned event received, but payload is incomplete or not for this user");
+                }
+            }
 
         },
 
@@ -266,7 +295,6 @@ var EvoRoom = {
 
     setupPageLayout: function() {
         $('.jquery-radios').buttonset();
-
         $('#log-in-success').show();
 
         $('#log-in-success .big-button').click(function() {
@@ -350,6 +378,7 @@ var EvoRoom = {
             $('#loading-page').show();
         });
 
+        
         /*************************************STEP 2***********************************************/
 
         $('#rotation-intro .big-button').click(function() {
@@ -408,7 +437,8 @@ var EvoRoom = {
         });
 
 
-        /**************************************STEP 3***********************************************/   
+        /**************************************STEP 3***********************************************/
+
         $('#interview-intro .first-interviewee').click(function() {
             $('#interview .interview-choice').text($('#interview-intro .first-interviewee').text());
             $('#interview-intro').hide();
@@ -447,6 +477,9 @@ var EvoRoom = {
             }
         });
 
+
+        /**************************************STEP 4***********************************************/
+        
         $('#group-notes .sync-button').click(function() {
             Sail.app.getInterviews();
         });
@@ -456,91 +489,29 @@ var EvoRoom = {
             $('#final-picks-ranking').show();
         });
 
-        /**************************************STEP 4***********************************************/       
-
-    },
-
-    barcodeScanSuccessRoomLogin: function(result) {
-        console.log("Got Barcode: " +result);
-        // send out event check_in
-        Sail.app.currentRainforest = result;
-        Sail.app.submitCheckIn();
-        // hide everything
-        Sail.app.hidePageElements();
-        // show waiting page
-        $('#loading-page').show();
-    },
-    
-    barcodeScanFailureRoomLogin: function(msg) {
-        console.warn("SCAN FAILED: "+msg);
-        $('#log-in-success').hide();
-        $('#room-scan-failure').show();
-    },
-
-    barcodeScanSuccessRainforest: function(result) {
-        console.log("Got Barcode: " +result);
-        // send out event check_in
-        Sail.app.currentRainforest = result;
-        Sail.app.submitCheckIn();
-        // hide everything
-        Sail.app.hidePageElements();
-        // show waiting page
-        $('#loading-page').show();
-    },
-
-    barcodeScanSuccessCheckLocationAssignment: function(result) {
-        console.log("Got Barcode: " +result);
-        // hide everything
-        Sail.app.hidePageElements();
-        // check if they are at the correct place
-        if (Sail.app.targetRainforest === result) {
-            Sail.app.currentRainforest = result;
-            Sail.app.submitCheckIn();
-            $('#loading-page').show();
-        }
-        // alert and send them back to the 5th screen
-        else {
-            alert ("You are at the wrong location, please scan again at the correct location");
-            $('#rotation-next-rainforest').show();
-        }
-
-    },
-
-    barcodeScanFailure: function(msg) {
-        alert("SCAN FAILED: "+msg);
-    },
-
-
-/*  TO_BE_RENAMED: function() {
-        var rainforestCounter = 0;      
-
-
-
-
         $('#final-picks-ranking .small-button').click(function() {
+            Sail.app.hidePageElements();
+            $('#loading-page').show();
             Sail.app.submitRankings();
-
-            $('#final-picks-ranking').hide();
-            $('#final-picks-discuss').show();
-            // fill in .discussion-content-question with question particular to the student
-            // send event to agent, put the following as sail event listener at top? Will it be fast enough?
-            // $('#final-picks-discuss .discussion-content-question').text('var);'
         });
-
+        
         $('#final-picks-discuss .small-button').click(function() {
             Sail.app.submitRationale();
-            $('#final-picks-discuss').hide();
+            Sail.app.hidePageElements();
             $('#final-picks-choice').show();
         });
 
         $('#final-picks-choice .big-button').click(function() {
-            // QR scan TODO
-            $('#final-picks-choice').hide();
+            window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRainforest, Sail.app.barcodeScanFailure);            
+        	Sail.app.hidePageElements();
             $('#final-picks-debrief').show();
         });
+
     },
-*/
+
+
     /********************************************* OUTGOING EVENTS *******************************************/
+    
     submitCheckIn: function() {
         var sev = new Sail.Event('check_in', {
             group_code:Sail.app.currentGroupCode,
@@ -624,6 +595,56 @@ var EvoRoom = {
 
     /****************************************** HELPER FUNCTIONS *************************************/
 
+    barcodeScanSuccessRoomLogin: function(result) {
+        console.log("Got Barcode: " +result);
+        // send out event check_in
+        Sail.app.currentRainforest = result;
+        Sail.app.submitCheckIn();
+        // hide everything
+        Sail.app.hidePageElements();
+        // show waiting page
+        $('#loading-page').show();
+    },
+    
+    barcodeScanFailureRoomLogin: function(msg) {
+        console.warn("SCAN FAILED: "+msg);
+        $('#log-in-success').hide();
+        $('#room-scan-failure').show();
+    },
+
+    barcodeScanSuccessRainforest: function(result) {
+        console.log("Got Barcode: " +result);
+        // send out event check_in
+        Sail.app.currentRainforest = result;
+        Sail.app.submitCheckIn();
+        // hide everything
+        Sail.app.hidePageElements();
+        // show waiting page
+        $('#loading-page').show();
+    },
+
+    barcodeScanSuccessCheckLocationAssignment: function(result) {
+        console.log("Got Barcode: " +result);
+        // hide everything
+        Sail.app.hidePageElements();
+        // check if they are at the correct place
+        if (Sail.app.targetRainforest === result) {
+            Sail.app.currentRainforest = result;
+            Sail.app.submitCheckIn();
+            $('#loading-page').show();
+        }
+        // alert and send them back to the 5th screen
+        else {
+            alert ("You are at the wrong location, please scan again at the correct location");
+            $('#rotation-next-rainforest').show();
+        }
+
+    },
+
+    barcodeScanFailure: function(msg) {
+        alert("SCAN FAILED: "+msg);
+    },
+    
     getInterviews: function() {
         $.ajax({
             type: "GET",
