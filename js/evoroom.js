@@ -237,6 +237,7 @@ var EvoRoom = {
     hidePageElements: function() {
         $('#loading-page').hide();
         $('#log-in-success').hide();
+        $('#room-scan-failure').hide();
         $('#survey-welcome').hide();
         $('#student-chosen-organisms').hide();
         $('#survey-organisms').hide();
@@ -269,13 +270,45 @@ var EvoRoom = {
         $('#log-in-success').show();
 
         $('#log-in-success .big-button').click(function() {
-            // trigger the QR scan screen/module to scan room entry
-            window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRoomLogin, Sail.app.barcodeScanFailure);
+            // check if barcodeScanner is possible (won't be outside of PhoneGap app)
+            if (window.plugins.barcodeScanner) {
+                // trigger the QR scan screen/module to scan room entry
+                window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRoomLogin, Sail.app.barcodeScanFailureRoomLogin);
+            } else {
+                // trigger the error handler to get alternative
+                $(Sail.app).trigger('barcodeScanFailureRoomLogin');
+            }
+        });
+        
+        // register on click listeners for room QR code scanning error resolution
+        $('#room-scan-failure .big-button').click(function() {
+            // hide everything
+            Sail.app.hidePageElements();
+            // show start page
+            $('#log-in-success').show();
+        });
+        
+        $('#room-scan-failure .big-error-resolver-button').click(function() {
+            // here I would like to trigger Sail.app.barcodeScanSuccessRoomLogin since it does everything, but don't know how to hand in attributes
+            //$(Sail.app).trigger('barcodeScanSuccessRoomLogin', 'room');
+            
+            // send out event check_in
+            Sail.app.currentRainforest = "room";
+            Sail.app.submitCheckIn();
+            // hide everything
+            Sail.app.hidePageElements();
+            // show waiting page
+            $('#loading-page').show();
         });
 
         $('#survey-welcome .big-button').click(function() {
             // trigger the QR scan screen/module to scan rainforests
-            window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRainforest, Sail.app.barcodeScanFailure);
+            if (window.plugins.barcodeScanner) {
+                window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRainforest, Sail.app.barcodeScanFailure);
+            } else {
+                // trigger the error handler to get alternative
+                alert('Not possible');
+            }
         });
 
         // setting up 3 on-click events for survey-organism
@@ -437,6 +470,12 @@ var EvoRoom = {
         // show waiting page
         $('#loading-page').show();
     },
+    
+    barcodeScanFailureRoomLogin: function(msg) {
+        console.warn("SCAN FAILED: "+msg);
+        $('#log-in-success').hide();
+        $('#room-scan-failure').show();
+    },
 
     barcodeScanSuccessRainforest: function(result) {
         console.log("Got Barcode: " +result);
@@ -505,7 +544,7 @@ var EvoRoom = {
     submitCheckIn: function() {
         var sev = new Sail.Event('check_in', {
             group_code:Sail.app.currentGroupCode,
-            rainforest:Sail.app.currentRainforest
+            location:Sail.app.currentRainforest
         });
         EvoRoom.groupchat.sendEvent(sev);
     },
