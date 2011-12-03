@@ -268,6 +268,7 @@ var EvoRoom = {
         $('#log-in-success').hide();
         $('#room-scan-failure').hide();
         $('#survey-welcome').hide();
+        $('#rainforest-scan-failure').hide();
         $('#student-chosen-organisms').hide();
         $('#survey-organisms').hide();
         $('#survey-organisms .next-rainforest').hide();
@@ -301,14 +302,14 @@ var EvoRoom = {
             // check if barcodeScanner is possible (won't be outside of PhoneGap app)
             if (window.plugins.barcodeScanner) {
                 // trigger the QR scan screen/module to scan room entry
-                window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRoomLogin, Sail.app.barcodeScanFailureRoomLogin);
+                window.plugins.barcodeScanner.scan(Sail.app.barcodeScanRoomLoginSuccess, Sail.app.barcodeScanRoomLoginFailure);
             } else {
                 // trigger the error handler to get alternative
-                $(Sail.app).trigger('barcodeScanFailureRoomLogin');
+                $(Sail.app).trigger('barcodeScanRoomLoginFailure');
             }
         });
         
-        // register on click listeners for room QR code scanning error resolution
+        // register on-click listeners for room QR code scanning error resolution
         $('#room-scan-failure .big-button').click(function() {
             // hide everything
             Sail.app.hidePageElements();
@@ -317,8 +318,8 @@ var EvoRoom = {
         });
         
         $('#room-scan-failure .big-error-resolver-button').click(function() {
-            // here I would like to trigger Sail.app.barcodeScanSuccessRoomLogin since it does everything, but don't know how to hand in attributes
-            //$(Sail.app).trigger('barcodeScanSuccessRoomLogin', 'room');
+            // here I would like to trigger Sail.app.barcodeScanRoomLoginSuccess since it does everything, but don't know how to hand in attributes
+            //$(Sail.app).trigger('barcodeScanRoomLoginSuccess', 'room');
             
             // send out event check_in
             Sail.app.currentRainforest = "room";
@@ -332,12 +333,31 @@ var EvoRoom = {
         $('#survey-welcome .big-button').click(function() {
             // trigger the QR scan screen/module to scan rainforests
             if (window.plugins.barcodeScanner) {
-                window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRainforest, Sail.app.barcodeScanFailure);
+                window.plugins.barcodeScanner.scan(Sail.app.barcodeScanRainforestSuccess, Sail.app.barcodeScanRainforestFailure);
             } else {
                 // trigger the error handler to get alternative
-                alert('Not possible');
+                $(Sail.app).trigger('barcodeScanRainforestFailure');
             }
+        });       
+        
+        // on-click listeners for rainforest QR scanning error resolution
+        $('#rainforest-scan-failure .big-button').click(function() {
+            // hide everything
+            Sail.app.hidePageElements();
+            // show start page
+            $('#survey-welcome').show();
         });
+        
+        $('#rainforest-scan-failure .small-error-resolver-button').click(function() {
+            // send out event check_in
+            Sail.app.currentRainforest = $(this).data('rainforest');
+            Sail.app.submitCheckIn();
+            // hide everything
+            Sail.app.hidePageElements();
+            // show waiting page
+            $('#loading-page').show();
+        });
+        
 
         // setting up 3 on-click events for survey-organism
         $('#survey-organisms .radio').click(function() {
@@ -367,7 +387,12 @@ var EvoRoom = {
             $('#survey-organisms .radio').button('refresh');
 
             // trigger the QR scan screen/module to scan rainforests
-            window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRainforest, Sail.app.barcodeScanFailure);
+            if (window.plugins.barcodeScanner) {
+                window.plugins.barcodeScanner.scan(Sail.app.barcodeScanRainforestSuccess, Sail.app.barcodeScanRainforestFailure);
+            } else {
+                // trigger the error handler to get alternative
+                $(Sail.app).trigger('barcodeScanRainforestFailure');
+            }
         });
 
         // on-click event to finish step1
@@ -464,7 +489,6 @@ var EvoRoom = {
 
                 $('#interview').hide();
                 $('#group-notes').show();
-                // grab stuff from db, populate .notes-table .first + .second TODO
             }
             else {
                 Sail.app.submitInterview();
@@ -508,7 +532,6 @@ var EvoRoom = {
         });
 
     },
-
 
     /********************************************* OUTGOING EVENTS *******************************************/
     
@@ -595,7 +618,7 @@ var EvoRoom = {
 
     /****************************************** HELPER FUNCTIONS *************************************/
 
-    barcodeScanSuccessRoomLogin: function(result) {
+    barcodeScanRoomLoginSuccess: function(result) {
         console.log("Got Barcode: " +result);
         // send out event check_in
         Sail.app.currentRainforest = result;
@@ -606,13 +629,13 @@ var EvoRoom = {
         $('#loading-page').show();
     },
     
-    barcodeScanFailureRoomLogin: function(msg) {
+    barcodeScanRoomLoginFailure: function(msg) {
         console.warn("SCAN FAILED: "+msg);
         $('#log-in-success').hide();
         $('#room-scan-failure').show();
     },
 
-    barcodeScanSuccessRainforest: function(result) {
+    barcodeScanRainforestSuccess: function(result) {
         console.log("Got Barcode: " +result);
         // send out event check_in
         Sail.app.currentRainforest = result;
@@ -621,6 +644,12 @@ var EvoRoom = {
         Sail.app.hidePageElements();
         // show waiting page
         $('#loading-page').show();
+    },
+    
+    barcodeScanRainforestFailure: function(msg) {
+        console.warn("SCAN FAILED: "+msg);
+        $('#log-in-success').hide();
+        $('#rainforest-scan-failure').show();
     },
 
     barcodeScanSuccessCheckLocationAssignment: function(result) {
