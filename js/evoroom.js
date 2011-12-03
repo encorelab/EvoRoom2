@@ -54,7 +54,7 @@ var EvoRoom = {
 						$('#student-chosen-organisms .second-organism').attr('src', '/images/' + ev.payload.second_organism + '_icon.png');
 						$('#student-chosen-organisms').show();
 					} else {
-						console.warn("location_assignment event received, but payload is either missing first_organism, second_organism, or both");
+						console.warn("organisms_assignment event received, but payload is either missing first_organism, second_organism, or both");
 					}
 				} else {
 					console.log("organisms_assignment event received but NOT for this user");
@@ -64,7 +64,8 @@ var EvoRoom = {
 			rainforests_completed_announcement: function(ev) {
 				if (ev.payload.completed_rainforests && ev.payload.user_name === Sail.app.session.account.login) {
 					Sail.app.hidePageElements();
-					$('#survey-organisms').show();
+					$('#survey-organisms .location').text(Sail.app.formatRainforestString(currentRainforest));
+					//$('#survey-organisms').show();
 					// clear radio buttons
 					$('input:radio').prop('checked', false);
 					$('#survey-organisms .radio').button('refresh');
@@ -72,7 +73,7 @@ var EvoRoom = {
 					// check if the user already did this rainforest
 					if ( _.find(ev.payload.completed_rainforests, function (rainforest) { return rainforest === Sail.app.currentRainforest; }) ) {
 						// show message and disable radio buttons - user must scan again
-						alert("Rainforest already done! Please scan another rainforest");
+						alert("Rainforest already complete! Please scan another rainforest");
 						$('#survey-organisms .survey-content-box').hide();
 						Sail.app.organismsRainforestCompleted = false;
 						// show the button to scan a rainforest
@@ -195,7 +196,7 @@ var EvoRoom = {
 		},
 
 		initialized: function(ev) {
-			Sail.app.hidePageElements();
+			// Sail.app.hidePageElements();
 			Sail.app.authenticate();
 		},
 
@@ -287,7 +288,7 @@ var EvoRoom = {
 		$('#group-notes').hide();
 		$('#final-picks-ranking').hide();
 		$('#final-picks-discuss').hide();
-		//$('#final-picks-discuss .question1').hide();
+		$('#final-picks-discuss .question1').hide();
 		$('#final-picks-discuss .question2').hide();
 		$('#final-picks-discuss .question3').hide();
 		$('#final-picks-choice').hide();
