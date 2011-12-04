@@ -33,20 +33,19 @@
 	
 <!-- ***********************************************SURVEY**************************************************** -->
 		
-		<div id="loading-page" style="display:none">
-			<div class="wait-text">Loading... please wait</div>
+		<div id="loading-page" class="full-text-box" style="display:none">
+			<div class="title"><b>Loading...</b></div>
+			<div>Please wait for next screen to appear!</div>
 		</div>
 		
-		<div id="student-chosen-organisms">
+		<div id="student-chosen-organisms" style="display:none">
 			<!-- TODO remove src and needs to be dynamically, in JS, just not sure where yet (after authenticate?) -->	
-			<img class="first-organism organism-image" src="" alt="Sumatra Orangutan" style="display:none">		
-			<img class="second-organism organism-image" src="/images/sumatran_rhino_icon.png" alt="Sumatra Rhino" style="display:none">
-
+			<img class="first-organism organism-image" src="/images/sumatran_rhino_icon.png" alt="Sumatra Orangutan">
+			<img class="second-organism organism-image" src="/images/sumatran_rhino_icon.png" alt="Sumatra Rhino">
 		</div>
 			
 		<div id="log-in-success" class="full-text-box" style="display:none">
 			<div class="title"><b>Log in successful</b></div>
-			<br>
 			<div>
 				To gain entry into our elite team of rainforest ecologists, you must successfully complete this exercise,
 				demonstrating your knowledge of rainforest ecology, knowledge of your specialist species, problem solving-skills
@@ -60,7 +59,6 @@
 		
 		<div id="room-scan-failure" class="full-text-box" style="display:none">
 			<div class="title"><b>QR code scanning failed</b></div>
-			<br>
 			<div>
 				QR scan on room entry failed. Either proceed without scanning or try again. 
 			</div>
@@ -70,7 +68,6 @@
 	
  		<div id="survey-welcome" class="full-text-box" style="display:none">
 			<div class="title"><b>Welcome to the simulation lab</b></div>
-			<br>
 			<div>
 				There are four different versions the Borneo rainforest ecosystem here. Why do they look different?
 				What happened to these systems? As part of today's exercise you will work with the others in this room to
@@ -87,7 +84,6 @@
 		
 		<div id="rainforest-scan-failure" class="full-text-box" style="display:none">
 			<div class="title"><b>Rainforest QR code scanning failed!</b></div>
-			<br>
 			<div>
 				Scanning the QR code of the rainforest failed. Please try again or proceed by pressing the button for the rainforest you are at. 
 			</div>
@@ -149,7 +145,6 @@
 		
 		<div id="rotation-intro" class="full-text-box" style="display:none">
 			<div class="title"><b>Step 1 complete</b></div>
-			<br>
 			<div>
 				One of these rainforests display the results from an environmental variable you and your group
 				members chose to analyze for a report. Your challenge is to eliminate the rainforests that most
@@ -163,7 +158,6 @@
 
 		<div id="rotation-note-taker" class="full-text-box" style="display:none">
 			<div class="title"><b>Location: </b><span class="current-rainforest"></span></div>
-			<br>
 			<div>
 				Instructions: Your assignment at this location is to be the note-taker. Discuss the
 				following questions with your group members and record your answers below.
@@ -189,7 +183,6 @@
 		<div id="rotation-field-guide" style="display:none">
 			<div class="full-text-box">
 				<div class="title"><b>Location: </b><span class="current-rainforest"></span></div>
-				<br>
 				<div>
 					<b>Instructions:</b> Your assignment at this location is to look up information in your field guide.
 					Follow the link below to go to the field guide site.
@@ -203,7 +196,6 @@
 		<div id="rotation-prediction" style="display:none">
 			<div class="full-text-box">
 				<div class="title"><b>Location: </b><span class="current-rainforest"></span></div>
-				<br>
 				<div>
 					<b>Instructions:</b> Your assignment at this location is to look up your prediction.
 					Follow the link below to go to your group's page.
@@ -217,7 +209,6 @@
 		<div id="rotation-field-guide-and-prediction" style="display:none">
 			<div class="full-text-box">
 				<div class="title"><b>Location: </b><span class="current-rainforest"></span></div>
-				<br>
 				<div>
 					<b>Instructions:</b> Your assignment at this location is to look up your prediction and your
 					field guide. Follow the links below to access the information. 
@@ -232,7 +223,6 @@
 
 		<div id="rotation-next-rainforest" class="full-text-box" style="display:none">
 			<div class="title"><b>Step 2 in progress</b></div>
-			<br>
 			<div>
 				Go to <span class="next-rainforest orange"><b></b></span>.
 				When you have all arrived, perform a QR scan.
@@ -245,7 +235,6 @@
 
 		<div id="interview-intro" class="full-text-box" style="display:none">
 			<div class="title"><b>Step 2 complete</b></div>
-			<br>
 			<div>
 				Your next task is to locate these reserachers (see below) and find out more information about THEIR rainforests.
 				After all, how will you know which rainforest is yours if you don't know how the other rainforests came to be?
@@ -273,7 +262,6 @@
 
 			<div class="full-text-box">
 				<div class="title"><b>Interview with <span class="interview-choice"></span></b></div>
-				<br>
 				<div>
 					What is your group's variable?
 				</div>
@@ -429,7 +417,6 @@
 		
 		<div id="final-picks-discuss" class="full-text-box" style="display:none">
 			<div class="title"><b>Step 4: In progress</b></div>
-			<br>
 			<div>
 				<b>Instructions: </b>Discuss the following question with your group members and provide your answer below.
 			</div>
@@ -450,7 +437,6 @@
 		
 		<div id="final-picks-choice" class="full-text-box" style="display:none">
 			<div class="title"><b>Step 4 almost complete</b></div>
-			<br>
 			<div>
 				Go to the rainforest that represents your first choice and perform a QR scan.
 			</div>
@@ -459,7 +445,6 @@
 		
 		<div id="final-picks-debrief" class="full-text-box" style="display:none">
 			<div class="title"><b>Step 4 complete</b></div>
-			<br>
 			<div>
 				Please wait here for your group debrief.
 			</div>
