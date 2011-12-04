@@ -26,6 +26,7 @@
 
 .title {
 	margin-top: 15px;
+	margin-bottom: 20px;
 }
 
 .big-button {
@@ -88,7 +89,7 @@
 .orange {
 	color: #FB983B;
 }
-
+/*
 #loading-page {
 	width: 100%;
 	height: 100%;	
@@ -102,7 +103,7 @@
 	top: 400px;
 	left: 200px;
 }
-
+*/
 /*************************************TO BE MOVED?****************************************/
 
 #student-chosen-organisms {
