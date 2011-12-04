@@ -87,6 +87,7 @@ var EvoRoom = {
                         $('#survey-organisms .survey-content-box').show();
                     }
 
+
                 } else {
                     console.warn("location_assignment event received, but payload is either missing go_to_location, student, or both");
                 }
@@ -95,7 +96,7 @@ var EvoRoom = {
             /*****************************************EVENTS ADDED FOR STEP 2***********************************************/            
 
             location_assignment: function(ev) {
-                if (ev.payload.user_name === Sail.app.session.account.login) {
+                if (ev.payload.go_to_location && ev.payload.user_name === Sail.app.session.account.login) {
                     Sail.app.hidePageElements();
                     Sail.app.targetRainforest = ev.payload.go_to_location;
 
