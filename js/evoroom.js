@@ -3,7 +3,7 @@
 
 var EvoRoom = {
     currentGroupCode: null,
-    currentRainforest: null,
+    currentRainforest: false,
     organismsRainforestsCompleted: false,
     firstRainforestAssigned: false,
     targetRainforest: null,
@@ -65,7 +65,7 @@ var EvoRoom = {
                 if (ev.payload.completed_rainforests && ev.payload.user_name === Sail.app.session.account.login) {
                     Sail.app.hidePageElements();
                     $('#survey-organisms .location').text(Sail.app.formatRainforestString(Sail.app.currentRainforest));
-                    //$('#survey-organisms').show();
+                    $('#survey-organisms').show();
                     // clear radio buttons
                     $('input:radio').prop('checked', false);
                     $('#survey-organisms .radio').button('refresh');
@@ -86,8 +86,7 @@ var EvoRoom = {
                         Sail.app.organismsRainforestCompleted = false;
                         $('#survey-organisms .survey-content-box').show();
                     }
-                    
-                    $('#survey-organisms').show();
+
 
                 } else {
                     console.warn("location_assignment event received, but payload is either missing go_to_location, student, or both");
