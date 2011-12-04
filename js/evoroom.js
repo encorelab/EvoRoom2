@@ -409,8 +409,13 @@ var EvoRoom = {
         /*************************************STEP 2***********************************************/
 
         $('#rotation-intro .big-button').click(function() {
-            // QR scan at assigned rainforest
-            window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessCheckLocationAssignment, Sail.app.barcodeScanFailure);
+            // trigger the QR scan screen/module to scan rainforests
+            if (window.plugins.barcodeScanner) {
+                window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessCheckLocationAssignment, Sail.app.barcodeScanRainforestFailure);
+            } else {
+                // trigger the error handler to get alternative
+                $(Sail.app).trigger('barcodeScanRainforestFailure');
+            }
         });
 
         // notetaker submits whether they think this is their rainforest
@@ -633,7 +638,8 @@ var EvoRoom = {
 
     barcodeScanRoomLoginFailure: function(msg) {
         console.warn("SCAN FAILED: "+msg);
-        $('#log-in-success').hide();
+        // hide everything
+        Sail.app.hidePageElements();
         $('#room-scan-failure').show();
     },
 
@@ -650,7 +656,8 @@ var EvoRoom = {
 
     barcodeScanRainforestFailure: function(msg) {
         console.warn("SCAN FAILED: "+msg);
-        $('#log-in-success').hide();
+        // hide everything
+        Sail.app.hidePageElements();
         $('#rainforest-scan-failure').show();
     },
 
