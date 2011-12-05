@@ -1,4 +1,4 @@
-/*jslint devel: true, regexp: true, browser: true, unparam: true, debug: true, sloppy: true, sub: true, es5: true, vars: true, evil: true, fragment: true, plusplus: false, nomen: false, white: false */
+/*jslint devel: true, regexp: true, browser: true, unparam: true, debug: true, sloppy: true, sub: true, es5: true, vars: true, evil: true, fragment: true, plusplus: true, nomen: true, white: true */
 /*globals Sail, Rollcall, $, Foo, _, window */
 
 var EvoRoom = {
