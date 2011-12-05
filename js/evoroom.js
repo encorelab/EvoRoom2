@@ -52,6 +52,8 @@ var EvoRoom = {
                         // assign right organisms according to event
                         $('#student-chosen-organisms .first-organism').attr('src', '/images/' + ev.payload.first_organism + '_icon.png');
                         $('#student-chosen-organisms .second-organism').attr('src', '/images/' + ev.payload.second_organism + '_icon.png');
+                        $('#survey-organisms .first-organism-name').text(Sail.app.formatOrganismString(ev.payload.first_organism));
+                        $('#survey-organisms .second-organism-name').text(Sail.app.formatOrganismString(ev.payload.second_organism));
                         $('#student-chosen-organisms').show();
                     } else {
                         console.warn("organisms_assignment event received, but payload is either missing first_organism, second_organism, or both");
@@ -717,18 +719,68 @@ var EvoRoom = {
     formatRainforestString: function(rainforestString) {
         if (rainforestString === "rainforest_a") {
             return "Rainforest A";
-        }
-        else if (rainforestString === "rainforest_b") {
+        } else if (rainforestString === "rainforest_b") {
             return "Rainforest B";
-        }
-        else if (rainforestString === "rainforest_c") {
+        } else if (rainforestString === "rainforest_c") {
             return "Rainforest C";
-        }
-        else if (rainforestString === "rainforest_d") {
+        } else if (rainforestString === "rainforest_d") {
             return "Rainforest D";
-        }
-        else {
+        } else {
             return "unknown rainforest";
+        }
+    },
+    
+    formatOrganismString: function(organismString) {
+        if (organismString === "ant") {
+            return "Ant";
+        } else if (organismString === "blue_headed_pitta") {
+            return "Blue headed pitta";
+        } else if (organismString === "bornean_orangutan") {
+            return "Bornean orangutan";
+        } else if (organismString === "borneo_porcupine") {
+            return "Borneo porcupine";
+        } else if (organismString === "civet") {
+            return "Civet";
+        } else if (organismString === "clouded_leopard") {
+            return "Clouded leopard";
+        } else if (organismString === "common_porcupine") {
+            return "Common porcupine";
+        } else if (organismString === "fig_tree") {
+            return "Fig tree";
+        } else if (organismString === "fig_wasp") {
+            return "Fig wasp";
+        } else if (organismString === "forest_durian") {
+            return "Forest durian";
+        } else if (organismString === "garnet_pitta") {
+            return "Garnet pitta";
+        } else if (organismString === "ginger") {
+            return "Ginger";
+        } else if (organismString === "helmeted_hornbill") {
+            return "Helmeted hornbill";
+        } else if (organismString === "jambu_tree") {
+            return "Jambu tree";
+        } else if (organismString === "leopard_cat") {
+            return "Leopard cat";
+        } else if (organismString === "malabar_grey_hornbill") {
+            return "Malabar grey hornbill";
+        } else if (organismString === "muellers_gibbon") {
+            return "Mueller's gibbon";
+        } else if (organismString === "pangolin") {
+            return "Pangolin";
+        } else if (organismString === "pheasant") {
+            return "Pheasant";
+        } else if (organismString === "pitcher_plant") {
+            return "Pitcher plant";
+        } else if (organismString === "proboscis_monkey") {
+            return "Proboscis monkey";
+        } else if (organismString === "rafflesia") {
+            return "Rafflesia";
+        } else if (organismString === "rhinoceros_hornbill") {
+            return "Rhinoceros hornbill";
+        } else if (organismString === "white_fronted_langur") {
+            return "White fronted langur";
+        } else {
+            return "unknown animal";
         }
     }
 };
