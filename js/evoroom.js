@@ -1,5 +1,5 @@
-/*jslint devel: true, regexp: true, browser: true, unparam: true, debug: true, sloppy: true, sub: true, es5: true, vars: true, evil: true, fragment: true, white: true, plusplus: true, nomen: true */
-/*globals Sail, Rollcall, $, Foo, _ */
+/*jslint devel: true, regexp: true, browser: true, unparam: true, debug: true, sloppy: true, sub: true, es5: true, vars: true, evil: true, fragment: true, plusplus: false, nomen: false, white: false */
+/*globals Sail, Rollcall, $, Foo, _, window */
 
 var EvoRoom = {
     currentGroupCode: null,
@@ -254,15 +254,15 @@ var EvoRoom = {
             Sail.app.rollcall.fetchSessionForToken(Sail.app.token, function(data) {
                 Sail.app.session = data.session;
                 Sail.app.rollcall.request(Sail.app.rollcall.url + "/users/"+Sail.app.session.account.login+".json",
-                        "GET", {}, function(data) {
-                            Sail.app.currentGroupCode = data.user.groups[0].name;
-                            $(Sail.app).trigger('authenticated');
-                        });
-            },
-            function(error) {
-                console.warn("Token '"+Sail.app.token+"' is invalid. Will try to re-authenticate...");
-                Rollcall.Authenticator.unauthenticate();
-            }
+                    "GET", {}, function(data) {
+                        Sail.app.currentGroupCode = data.user.groups[0].name;
+                        $(Sail.app).trigger('authenticated');
+                    });
+                },
+                function(error) {
+                    console.warn("Token '"+Sail.app.token+"' is invalid. Will try to re-authenticate...");
+                    Rollcall.Authenticator.unauthenticate();
+                }
             );
         }
     },
