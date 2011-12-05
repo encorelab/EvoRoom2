@@ -12,7 +12,7 @@ class EventLogger < Sail::Agent
       @mongo = Mongo::Connection.new.db(config[:database])
       
       join_room
-      join_log_room
+      #join_log_room
     end
     
     self_joined_log_room do |stanza|
