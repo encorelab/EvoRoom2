@@ -22,7 +22,7 @@ class EventLogger < Sail::Agent
     # we don't specify an event type, so this will catch ALL events
     event do |stanza, data|
       log "Storing event: #{data.inspect}"
-      @mongo.collection('events').save(data)
+      @mongo.collection(:events).save(data)
     end
     
     # event :check_in? do |stanza, data|
