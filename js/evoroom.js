@@ -11,6 +11,7 @@ var EvoRoom = {
     rotationRainforestsCompleted: false,
     firstInterview: false,
     secondInterview: false,
+    rationaleAssigned: null,
 
     rollcallURL: '/rollcall',
 
@@ -181,19 +182,19 @@ var EvoRoom = {
                     Sail.app.hidePageElements();
 
                     // show the question assigned to this student
-                    if (ev.payload.question === "1") {
+                    if (ev.payload.question === "strategy") {
                         $('#final-picks-discuss .question1').show();
                     }
-                    else if (ev.payload.question === "2") {
+                    else if (ev.payload.question === "evidence") {
                         $('#final-picks-discuss .question2').show();
                     }
-                    else if (ev.payload.question === "3") {
+                    else if (ev.payload.question === "additional_info") {
                         $('#final-picks-discuss .question3').show();
                     }
                     else {
                         alert("agent error. Please reconnect");
                     }
-
+                    Sail.app.rationaleAssigned = ev.payload.question;
                     $('#final-picks-discuss').show();
                 }
                 else {
@@ -616,28 +617,33 @@ var EvoRoom = {
     },
 
     submitOrganismsPresent: function() {
+        var formattedOrg1 = Sail.app.formatOrganismString(Sail.app.organism_1);
+        var formattedOrg2 = Sail.app.formatOrganismString(Sail.app.organism_2);
+        var formattedRadio1 = Sail.app.formatStringToBoolean($('input:radio[name=first-organism-yn]:checked').val());
+        var formattedRadio2 = Sail.app.formatStringToBoolean($('input:radio[name=second-organism-yn]:checked').val());
         var sev = new Sail.Event('organism_present', {
             group_code:Sail.app.currentGroupCode,
             author:Sail.app.session.account.login,
             location:Sail.app.currentRainforest,
             first_organism:{
-                organism:$('#survey-organisms .first-organism').val(),
-                present:$('input:radio[name=first-organism-yn]:checked').val()
+                organism:formattedOrg1,
+                present:formattedRadio1
             },
             second_organism:{
-                organism:$('#survey-organisms .second-organism').val(),
-                present:$('input:radio[name=first-organism-yn]:checked').val()
+                organism:formattedOrg2,
+                present:formattedRadio2
             }
         });
         EvoRoom.groupchat.sendEvent(sev);
     },
 
     submitRainforestGuess: function() {
+        var formattedYesNo = Sail.app.formatStringToBoolean($('input:radio[name=your-rainforest]:checked').val());
         var sev = new Sail.Event('rainforest_guess_submitted', {
             group_code:Sail.app.currentGroupCode,
             author:Sail.app.session.account.login,
-            rainforest:Sail.app.currentRainforest,
-            your_rainforest:$('input:radio[name=your-rainforest]:checked').val(),
+            location:Sail.app.currentRainforest,
+            your_rainforest:formattedYesNo,
             explanation:$('#rotation-note-taker .rainforest-explanation-text-entry').val()
         });
         EvoRoom.groupchat.sendEvent(sev);
@@ -678,11 +684,21 @@ var EvoRoom = {
     },
 
     submitRationale: function() {
+        var textToSubmit = "";
+        if (Sail.app.rationaleAssigned === "strategy") {
+            textToSubmit = $('#final-picks-discuss .question1 .discussion-content-text-entry').val();
+        } else if (Sail.app.rationaleAssigned === "evidence") {
+            textToSubmit = $('#final-picks-discuss .question2 .discussion-content-text-entry').val();
+        } else if (Sail.app.rationaleAssigned === "additional_info") {
+            textToSubmit = $('#final-picks-discuss .question3 .discussion-content-text-entry').val();
+        } else {
+            console.log("Rationale does not match question");
+        }
         var sev = new Sail.Event('rationale_submitted', {
             group_code:Sail.app.currentGroupCode,
             author:Sail.app.session.account.login,
-            question:$('#final-picks-discuss .discussion-content-question').attr('value'),
-            answer:$('#final-picks-discuss .discussion-content-text-entry').val()
+            question:Sail.app.rationaleAssigned,
+            answer:textToSubmit
         });
         EvoRoom.groupchat.sendEvent(sev);
     },  
@@ -798,6 +814,14 @@ var EvoRoom = {
             return "Rainforest D";
         } else {
             return "unknown rainforest";
+        }
+    },
+    
+    formatStringToBoolean: function(radioString) {
+        if (radioString === "true") {
+            return true;
+        } else {
+            return false;
         }
     },
     
