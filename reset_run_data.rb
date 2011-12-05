@@ -8,6 +8,7 @@ DB = "evoroom"
 RUN = "michelle-fall-2011"
 
 require 'sail/rollcall/user'
+#require 'sail/rollcall/group'
 
 json = File.read("config.json")
 config = JSON.parse(json, :symbolize_names => true)
@@ -24,13 +25,21 @@ keep_metadata_keys = ["assigned_organism_1", "assigned_organism_2", "key"]
 
 Rollcall::User.site = config[:rollcall][:url]
 
-Rollcall::User.find(:all, :from => "/runs/#{RUN}/users.xml").each do |u|
+users_url = "/runs/#{RUN}/users.xml"
+puts "Pulling users from #{users_url}"
+Rollcall::User.find(:all, :from => users_url).each do |u|
   puts "Wiping metadata for #{u.account.login.inspect}..."
   (u.metadata.attributes.keys).each do |key|
     unless keep_metadata_keys.include?(key)
       puts " - #{key}"
       u.metadata.send("#{key}=", nil)
     end
+    #g = Rollcall::Group.find(u.groups.first.id)
+    #if g
+    #  puts "Clearing metadata for group #{g.name}"
+    #  g.metadata.assigned_location_for_guess = nil
+    #  g.save
+    #end
   end
   u.save
 end
