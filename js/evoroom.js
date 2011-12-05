@@ -322,7 +322,7 @@ var EvoRoom = {
                 window.plugins.barcodeScanner.scan(Sail.app.barcodeScanRoomLoginSuccess, Sail.app.barcodeScanRoomLoginFailure);
             } else {
                 // trigger the error handler to get alternative
-                $(Sail.app).trigger('barcodeScanRoomLoginFailure');
+                Sail.app.barcodeScanRoomLoginFailure('No scanner, probably desktop browser');
             }
         });
 
@@ -357,7 +357,7 @@ var EvoRoom = {
                 window.plugins.barcodeScanner.scan(Sail.app.barcodeScanRainforestSuccess, Sail.app.barcodeScanRainforestFailure);
             } else {
                 // trigger the error handler to get alternative
-                $(Sail.app).trigger('barcodeScanRainforestFailure');
+                Sail.app.barcodeScanRainforestFailure('No scanner, probably desktop browser');
             }
         });
 
@@ -412,7 +412,7 @@ var EvoRoom = {
                 window.plugins.barcodeScanner.scan(Sail.app.barcodeScanRainforestSuccess, Sail.app.barcodeScanRainforestFailure);
             } else {
                 // trigger the error handler to get alternative
-                $(Sail.app).trigger('barcodeScanRainforestFailure');
+                Sail.app.barcodeScanRainforestFailure('No scanner, probably desktop browser');
             }
         });
 
