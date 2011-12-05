@@ -690,7 +690,7 @@ var EvoRoom = {
             type: "GET",
             url: "/mongoose/evoroom/events/_find",
             data: {criteria: JSON.stringify({"run.name":Sail.app.run.name, "eventType":"interview_submitted", "payload.group_code":Sail.app.currentGroupCode})},
-            context: {},        //should this be changed?
+            context: {},        // should this be changed?
             success: function(data) {
                 //criteria = {"run.name":Sail.app.run.name, "eventType":"interview_submitted", "payload.group_code":Sail.app.currentGroupCode};
 
