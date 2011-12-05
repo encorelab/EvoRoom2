@@ -27,6 +27,7 @@ Rollcall::User.site = config[:rollcall][:url]
 
 users_url = "/runs/#{RUN}/users.xml"
 puts "Pulling users from #{users_url}"
+Rollcall::User.format = ActiveResource::Formats::XmlFormat
 Rollcall::User.find(:all, :from => users_url).each do |u|
   puts "Wiping metadata for #{u.account.login.inspect}..."
   (u.metadata.attributes.keys).each do |key|
