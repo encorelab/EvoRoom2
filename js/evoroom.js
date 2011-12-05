@@ -1,7 +1,9 @@
-/*jslint devel: true, regexp: true, browser: true, unparam: true, debug: true, sloppy: true, sub: true, es5: true, vars: true, evil: true, fragment: true, plusplus: false, nomen: false, white: false */
+/*jslint devel: true, regexp: true, browser: true, unparam: true, debug: true, sloppy: true, sub: true, es5: true, vars: true, evil: true, fragment: true, plusplus: true, nomen: true, white: true */
 /*globals Sail, Rollcall, $, Foo, _, window */
 
 var EvoRoom = {
+    organism_1: null,
+    organism_2: null,
     currentGroupCode: null,
     currentRainforest: false,
     organismsRainforestsCompleted: false,
@@ -42,7 +44,7 @@ var EvoRoom = {
                 }
             },
 
-            organisms_assignment: function(ev) {
+/*            organisms_assignment: function(ev) {
                 // check that message is for currently logged in user
                 if (ev.payload.user_name && ev.payload.user_name === Sail.app.session.account.login) {
                     if (ev.payload.first_organism && ev.payload.second_organism) {
@@ -61,7 +63,7 @@ var EvoRoom = {
                 } else {
                     console.log("organisms_assignment event received but NOT for this user");
                 }
-            },
+            },*/
 
             rainforests_completed_announcement: function(ev) {
                 if (ev.payload.completed_rainforests && ev.payload.user_name === Sail.app.session.account.login) {
@@ -88,8 +90,6 @@ var EvoRoom = {
                         Sail.app.organismsRainforestCompleted = false;
                         $('#survey-organisms .survey-content-box').show();
                     }
-
-
                 } else {
                     console.warn("location_assignment event received, but payload is either missing go_to_location, student, or both");
                 }
@@ -256,6 +256,8 @@ var EvoRoom = {
                 Sail.app.rollcall.request(Sail.app.rollcall.url + "/users/"+Sail.app.session.account.login+".json",
                     "GET", {}, function(data) {
                         Sail.app.currentGroupCode = data.user.groups[0].name;
+                        Sail.app.organism_1 = data.user.metadata.assigned_organism_1;
+                        Sail.app.organism_2 = data.user.metadata.assigned_organism_2;
                         $(Sail.app).trigger('authenticated');
                     });
                 },
@@ -299,6 +301,10 @@ var EvoRoom = {
     },
 
     setupPageLayout: function() {
+        $('#student-chosen-organisms .first-organism').attr('src', '/images/' + Sail.app.organism_1 + '_icon.png');
+        $('#student-chosen-organisms .second-organism').attr('src', '/images/' + Sail.app.organism_2 + '_icon.png');
+        $('#survey-organisms .first-organism-name').text(Sail.app.formatOrganismString(Sail.app.organism_1));
+        $('#survey-organisms .second-organism-name').text(Sail.app.formatOrganismString(Sail.app.organism_2));
         $('.jquery-radios').buttonset();
         $('#log-in-success').show();
 
@@ -331,7 +337,8 @@ var EvoRoom = {
             // hide everything
             Sail.app.hidePageElements();
             // show waiting page
-            $('#loading-page').show();
+            $('#survey-welcome').show();
+            $('#student-chosen-organisms').show();
         });
 
         $('#survey-welcome .big-button').click(function() {
@@ -342,7 +349,7 @@ var EvoRoom = {
                 // trigger the error handler to get alternative
                 $(Sail.app).trigger('barcodeScanRainforestFailure');
             }
-        });       
+        });
 
         // on-click listeners for rainforest QR scanning error resolution
         $('#rainforest-scan-failure .big-button').click(function() {
@@ -358,7 +365,7 @@ var EvoRoom = {
             Sail.app.submitCheckIn();
             // hide everything
             Sail.app.hidePageElements();
-            // show waiting page
+            // wait
             $('#loading-page').show();
         });
 
@@ -635,7 +642,8 @@ var EvoRoom = {
         // hide everything
         Sail.app.hidePageElements();
         // show waiting page
-        $('#loading-page').show();
+        $('#survey-welcome').show();
+        $('#student-chosen-organisms').show();
     },
 
     barcodeScanRoomLoginFailure: function(msg) {
@@ -690,7 +698,7 @@ var EvoRoom = {
             type: "GET",
             url: "/mongoose/evoroom/events/_find",
             data: {criteria: JSON.stringify({"run.name":Sail.app.run.name, "eventType":"interview_submitted", "payload.group_code":Sail.app.currentGroupCode})},
-            context: {},        //should this be changed?
+            context: {},        // should this be changed?
             success: function(data) {
                 //criteria = {"run.name":Sail.app.run.name, "eventType":"interview_submitted", "payload.group_code":Sail.app.currentGroupCode};
 
