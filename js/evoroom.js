@@ -2,8 +2,7 @@
 /*globals Sail, Rollcall, $, Foo, _, window */
 
 var EvoRoom = {
-    organism_1: null,
-    organism_2: null,
+    user_metadata: null,
     currentGroupCode: null,
     currentRainforest: false,
     organismsRainforestsCompleted: false,
@@ -19,7 +18,7 @@ var EvoRoom = {
         sail: {
             /********************************************* INCOMING EVENTS *******************************************/
             start_step: function(ev) {
-                if (ev.payload.user_name && ev.payload.user_name === Sail.app.session.account.login) {
+                if (ev.payload.username && ev.payload.username === Sail.app.session.account.login) {
                     if (ev.payload.step_id) {
                         if (ev.payload.step_id === "STEP_1") {
                             console.log("Received start_step for step1 - nothing done with it right now!");
@@ -46,7 +45,7 @@ var EvoRoom = {
 
 /*            organisms_assignment: function(ev) {
                 // check that message is for currently logged in user
-                if (ev.payload.user_name && ev.payload.user_name === Sail.app.session.account.login) {
+                if (ev.payload.username && ev.payload.username === Sail.app.session.account.login) {
                     if (ev.payload.first_organism && ev.payload.second_organism) {
                         Sail.app.hidePageElements();
                         // make sure the survey welcome screen come up with the animals received
@@ -66,39 +65,45 @@ var EvoRoom = {
             },*/
 
             rainforests_completed_announcement: function(ev) {
-                if (ev.payload.completed_rainforests && ev.payload.user_name === Sail.app.session.account.login) {
-                    Sail.app.hidePageElements();
-                    $('#survey-organisms .location').text(Sail.app.formatRainforestString(Sail.app.currentRainforest));
-                    $('#survey-organisms').show();
-                    // clear radio buttons
-                    $('input:radio').prop('checked', false);
-                    $('#survey-organisms .radio').button('refresh');
+                if (ev.payload.completed_rainforests && ev.payload.username === Sail.app.session.account.login) {
+                    // if rainforest is empty we probably missed QR scanning so we just have to go to rainforest scanning first
+                    if (Sail.app.currentRainforest) {
+                        Sail.app.hidePageElements();
+                        $('#survey-organisms .location').text(Sail.app.formatRainforestString(Sail.app.currentRainforest));
+                        $('#survey-organisms').show();
+                        // clear radio buttons
+                        $('input:radio').prop('checked', false);
+                        $('#survey-organisms .radio').button('refresh');
 
-                    // check if the user already did this rainforest
-                    if ( _.find(ev.payload.completed_rainforests, function (rainforest) { return rainforest === Sail.app.currentRainforest; }) ) {
-                        // show message and disable radio buttons - user must scan again
-                        alert("Rainforest already complete! Please scan another rainforest");
-                        $('#survey-organisms .survey-content-box').hide();
-                        Sail.app.organismsRainforestCompleted = false;
-                        // show the button to scan a rainforest
-                        $('#survey-organisms .next-rainforest').show();
-                    } else if (ev.payload.completed_rainforests.length >= 3) {
-                        // user did all the other forests and is done after this one
-                        Sail.app.organismsRainforestCompleted = true;
-                        $('#survey-organisms .survey-content-box').show();
+                        // check if the user already did this rainforest
+                        if ( _.find(ev.payload.completed_rainforests, function (rainforest) { return rainforest === Sail.app.currentRainforest; }) ) {
+                            // show message and disable radio buttons - user must scan again
+                            alert("Rainforest already complete! Please scan another rainforest");
+                            $('#survey-organisms .survey-content-box').hide();
+                            Sail.app.organismsRainforestCompleted = false;
+                            // show the button to scan a rainforest
+                            $('#survey-organisms .next-rainforest').show();
+                        } else if (ev.payload.completed_rainforests.length >= 3) {
+                            // user did all the other forests and is done after this one
+                            Sail.app.organismsRainforestCompleted = true;
+                            $('#survey-organisms .survey-content-box').show();
+                        } else {
+                            Sail.app.organismsRainforestCompleted = false;
+                            $('#survey-organisms .survey-content-box').show();
+                        }
                     } else {
-                        Sail.app.organismsRainforestCompleted = false;
-                        $('#survey-organisms .survey-content-box').show();
+                        Sail.app.hidePageElements();
+                        $('#survey-welcome').show();
                     }
                 } else {
-                    console.warn("location_assignment event received, but payload is either missing go_to_location, student, or both");
+                    console.warn("rainforests_completed_announcement event received, but payload is either missing go_to_location, username, or both");
                 }
             },
 
             /*****************************************EVENTS ADDED FOR STEP 2***********************************************/            
 
             location_assignment: function(ev) {
-                if (ev.payload.go_to_location && ev.payload.user_name === Sail.app.session.account.login) {
+                if (ev.payload.go_to_location && ev.payload.username === Sail.app.session.account.login) {
                     Sail.app.hidePageElements();
                     Sail.app.targetRainforest = ev.payload.go_to_location;
 
@@ -118,7 +123,7 @@ var EvoRoom = {
             },
 
             task_assignment: function(ev) {
-                if (ev.payload.task && ev.payload.user_name === Sail.app.session.account.login) {
+                if (ev.payload.task && ev.payload.username === Sail.app.session.account.login) {
                     Sail.app.hidePageElements();
                     // clear all fields
                     $('#rotation-note-taker .rainforest-explanation-text-entry').text('');
@@ -150,7 +155,7 @@ var EvoRoom = {
             /*****************************************EVENTS ADDED FOR STEP 3***********************************************/
 
             interviewees_assigned: function(ev) {
-                if (ev.payload.user_name && ev.payload.user_name === Sail.app.session.account.login) {       // this is a little strange. Is this intentional?
+                if (ev.payload.username && ev.payload.username === Sail.app.session.account.login) {       // this is a little strange. Is this intentional?
                     if (ev.payload.first_interviewee && ev.payload.second_interviewee) {
                         Sail.app.hidePageElements();
                         // set up first interviewee
@@ -172,7 +177,7 @@ var EvoRoom = {
             /*****************************************EVENTS ADDED FOR STEP 4***********************************************/            
 
             rationale_assigned: function(ev) {
-                if (ev.payload.question && ev.payload.user_name === Sail.app.session.account.login) {
+                if (ev.payload.question && ev.payload.username === Sail.app.session.account.login) {
                     Sail.app.hidePageElements();
 
                     // show the question assigned to this student
@@ -209,6 +214,7 @@ var EvoRoom = {
 
         connected: function(ev) {
             Sail.app.setupPageLayout();
+            Sail.app.restoreState();
         },
 
         unauthenticated: function(ev) {
@@ -256,8 +262,7 @@ var EvoRoom = {
                 Sail.app.rollcall.request(Sail.app.rollcall.url + "/users/"+Sail.app.session.account.login+".json",
                     "GET", {}, function(data) {
                         Sail.app.currentGroupCode = data.user.groups[0].name;
-                        Sail.app.organism_1 = data.user.metadata.assigned_organism_1;
-                        Sail.app.organism_2 = data.user.metadata.assigned_organism_2;
+                        Sail.app.user_metadata = data.user.metadata;
                         $(Sail.app).trigger('authenticated');
                     });
                 },
@@ -275,6 +280,7 @@ var EvoRoom = {
         $('#room-scan-failure').hide();
         $('#survey-welcome').hide();
         $('#rainforest-scan-failure').hide();
+        $('#rotation-scan-failure').hide();
         $('#student-chosen-organisms').hide();
         $('#survey-organisms').hide();
         $('#survey-organisms .next-rainforest').hide();
@@ -301,12 +307,12 @@ var EvoRoom = {
     },
 
     setupPageLayout: function() {
-        $('#student-chosen-organisms .first-organism').attr('src', '/images/' + Sail.app.organism_1 + '_icon.png');
-        $('#student-chosen-organisms .second-organism').attr('src', '/images/' + Sail.app.organism_2 + '_icon.png');
-        $('#survey-organisms .first-organism-name').text(Sail.app.formatOrganismString(Sail.app.organism_1));
-        $('#survey-organisms .second-organism-name').text(Sail.app.formatOrganismString(Sail.app.organism_2));
+        $('#student-chosen-organisms .first-organism').attr('src', '/images/' + Sail.app.user_metadata.assigned_organism_1 + '_icon.png');
+        $('#student-chosen-organisms .second-organism').attr('src', '/images/' + Sail.app.user_metadata.assigned_organism_2 + '_icon.png');
+        $('#survey-organisms .first-organism-name').text(Sail.app.formatOrganismString(Sail.app.user_metadata.assigned_organism_1));
+        $('#survey-organisms .second-organism-name').text(Sail.app.formatOrganismString(Sail.app.user_metadata.assigned_organism_2));
         $('.jquery-radios').buttonset();
-        $('#log-in-success').show();
+        //$('#log-in-success').show();
 
         $('#log-in-success .big-button').click(function() {
             // check if barcodeScanner is possible (won't be outside of PhoneGap app)
@@ -330,15 +336,18 @@ var EvoRoom = {
         $('#room-scan-failure .big-error-resolver-button').click(function() {
             // here I would like to trigger Sail.app.barcodeScanRoomLoginSuccess since it does everything, but don't know how to hand in attributes
             //$(Sail.app).trigger('barcodeScanRoomLoginSuccess', 'room');
+            
+            // don't need to trigger, just call the function
+            Sail.app.barcodeScanRoomLoginSuccess('room');
 
             // send out event check_in
-            Sail.app.currentRainforest = "room";
+            /*Sail.app.currentRainforest = "room";
             Sail.app.submitCheckIn();
             // hide everything
             Sail.app.hidePageElements();
             // show waiting page
             $('#survey-welcome').show();
-            $('#student-chosen-organisms').show();
+            $('#student-chosen-organisms').show();*/
         });
 
         $('#survey-welcome .big-button').click(function() {
@@ -409,6 +418,11 @@ var EvoRoom = {
         // on-click event to finish step1
         $('#survey-organisms .small-button').click(function() {
             Sail.app.hidePageElements();
+            
+            // we also need to submit the organisms_present event
+            if ( $('.first-radios').is(':checked') && $('.second-radios').is(':checked') ) {
+                Sail.app.submitOrganismsPresent();
+            }
 
             // show wait screen and wait for start_step event to show rotation-intro
             $('#loading-page').show();
@@ -420,11 +434,29 @@ var EvoRoom = {
         $('#rotation-intro .big-button').click(function() {
             // trigger the QR scan screen/module to scan rainforests
             if (window.plugins.barcodeScanner) {
-                window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessCheckLocationAssignment, Sail.app.barcodeScanRainforestFailure);
+                window.plugins.barcodeScanner.scan(Sail.app.barcodeScanCheckLocationAssignmentSuccess, Sail.app.barcodeScanCheckLocationAssignmentFailure);
             } else {
-                // trigger the error handler to get alternative
-                $(Sail.app).trigger('barcodeScanRainforestFailure');
+                // call the error handler to get alternative
+                Sail.app.barcodeScanCheckLocationAssignmentFailure('No scanner, probably desktop browser');
             }
+        });
+        
+        // rotation QR scanner error handler
+        $('#rotation-scan-failure .big-button').click(function() {
+            // hide everything
+            Sail.app.hidePageElements();
+            // show start page
+            $('#rotation-next-rainforest').show();
+        });
+        
+        $('#rotation-scan-failure .small-error-resolver-button').click(function() {
+            // send out event check_in
+            Sail.app.currentRainforest = $(this).data('rainforest');
+            Sail.app.submitCheckIn();
+            // hide everything
+            Sail.app.hidePageElements();
+            // wait
+            $('#loading-page').show();
         });
 
         // notetaker submits whether they think this is their rainforest
@@ -474,7 +506,16 @@ var EvoRoom = {
 
         $('#rotation-next-rainforest .big-button').click(function() {
             Sail.app.hidePageElements();
-            window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessCheckLocationAssignment, Sail.app.barcodeScanFailure);
+            
+            // trigger the QR scan screen/module to scan rainforests
+            if (window.plugins.barcodeScanner) {
+                window.plugins.barcodeScanner.scan(Sail.app.barcodeScanCheckLocationAssignmentSuccess, Sail.app.barcodeScanCheckLocationAssignmentFailure);
+            } else {
+                // call the error handler to get alternative
+                Sail.app.barcodeScanCheckLocationAssignmentFailure('No scanner, probably desktop browser');
+            }
+            
+            //window.plugins.barcodeScanner.scan(Sail.app.barcodeScanCheckLocationAssignmentSuccess, Sail.app.barcodeScanFailure);
         });
 
 
@@ -547,6 +588,21 @@ var EvoRoom = {
             $('#final-picks-debrief').show();
         });
 
+    },
+    
+    restoreState: function() {
+        //alert('bring user back to state');
+        if (!Sail.app.user_metadata.state || Sail.app.user_metadata.state === 'LOGGED_IN') {
+            // show page to do room QR scanning
+            $('#log-in-success').show();
+        } else if (Sail.app.user_metadata.state === 'IN_ROOM' || Sail.app.user_metadata.state === 'AT_PRESENCE_LOCATION') {
+            // show page to do rainforst QR scanning
+            $('#survey-welcome').show();
+        } else if (Sail.app.user_metadata.state === 'GUESS_LOCATION_ASSIGNED') {
+            $('#rotation-intro .current-rainforest').text(Sail.app.formatRainforestString(Sail.app.user_metadata.currently_assigned_location));
+            $('#rotation-next-rainforest .next-rainforest').text(Sail.app.formatRainforestString(Sail.app.user_metadata.currently_assigned_location));
+            $('#rotation-next-rainforest').show();
+        }
     },
 
     /********************************************* OUTGOING EVENTS *******************************************/
@@ -671,7 +727,7 @@ var EvoRoom = {
         $('#rainforest-scan-failure').show();
     },
 
-    barcodeScanSuccessCheckLocationAssignment: function(result) {
+    barcodeScanCheckLocationAssignmentSuccess: function(result) {
         console.log("Got Barcode: " +result);
         // hide everything
         Sail.app.hidePageElements();
@@ -687,6 +743,13 @@ var EvoRoom = {
             $('#rotation-next-rainforest').show();
         }
 
+    },
+    
+    barcodeScanCheckLocationAssignmentFailure: function(msg) {
+        console.log("Got Barcode: " +msg);
+        // hide everything
+        Sail.app.hidePageElements();
+        $('#rotation-scan-failure').show();
     },
 
     barcodeScanFailure: function(msg) {
