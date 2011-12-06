@@ -20,7 +20,8 @@ var EvoRoom = {
             /********************************************* INCOMING EVENTS *******************************************/
             start_step: function(ev) {
                 if (ev.payload.username && ev.payload.username === Sail.app.session.account.login) {
-                    if (ev.payload.step_id) {
+                    if (ev.payload.step_id) {ev
+                        
                         if (ev.payload.step_id === "STEP_1") {
                             console.log("Received start_step for step1 - nothing done with it right now!");
                         } else if (ev.payload.step_id === "STEP_2") {
@@ -143,7 +144,7 @@ var EvoRoom = {
                         $('#rotation-prediction .current-rainforest').text(Sail.app.formatRainforestString(Sail.app.currentRainforest));
                         $('#rotation-prediction').show();
                     }
-                    else if (ev.payload.task === "guide_prediction_looker_upper") {
+                    else if (ev.payload.task === "other") {
                         $('#rotation-field-guide .current-rainforest').text(Sail.app.formatRainforestString(Sail.app.currentRainforest));
                         $('#rotation-field-guide-and-prediction').show();
                     }
@@ -584,7 +585,7 @@ var EvoRoom = {
         });
 
         $('#final-picks-choice .big-button').click(function() {
-            window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRainforest, Sail.app.barcodeScanFailure);            
+            window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRainforest, Sail.app.barcodeScanFailure);
             Sail.app.hidePageElements();
             $('#final-picks-debrief').show();
         });
