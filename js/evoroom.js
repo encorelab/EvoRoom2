@@ -232,6 +232,19 @@ var EvoRoom = {
         },
 
         unauthenticated: function(ev) {
+            Sail.app.user_metadata = null;
+            Sail.app.currentGroupCode = null;
+            Sail.app.currentRainforest = false;
+            Sail.app.organismsRainforestsCompleted = false;
+            Sail.app.firstRainforestAssigned = false;
+            Sail.app.targetRainforest = null;
+            Sail.app.rotationRainforestsCompleted = false;
+            Sail.app.firstInterview = false;
+            Sail.app.secondInterview = false;
+            Sail.app.rationaleAssigned = null;
+            
+            Sail.app.hidePageElements();
+            
             Rollcall.Authenticator.requestRun();
         }
     },
