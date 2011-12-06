@@ -607,6 +607,13 @@ var EvoRoom = {
             // wait for task_assignment message (from agent once all team members are at this state)
             Sail.app.targetRainforest = Sail.app.user_metadata.currently_assigned_location;
             $('#loading-page').show();
+        } else if (Sail.app.user_metadata.state === 'GUESS_TASK_ASSIGNED') {
+            Sail.app.currentRainforest = Sail.app.user_metadata.currently_assigned_location;
+            if (Sail.app.user_metadata.currently_assigned_task === 'scribe') {
+                $('#rotation-note-taker').show();
+            } else {
+                $('#rotation-field-guide-and-prediction').show();
+            }
         }
         else {
             console.warn('restoreState: read state <'+Sail.app.user_metadata.state+ '> which is not handled currently.');
