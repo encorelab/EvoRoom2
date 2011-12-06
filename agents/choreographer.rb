@@ -2,7 +2,6 @@ require 'rubygems'
 require 'blather/client/dsl'
 require 'json'
 require 'mongo'
-require 'golem'
 
 $: << 'sail.rb/lib'
 require 'sail/agent'
@@ -33,9 +32,12 @@ class Choreographer < Sail::Agent
     end
     
     someone_joined_room do |stanza|
-      stu = lookup_student(Util.extract_login(stanza.from))
+      stu = lookup_student(Util.extract_login(stanza.from), true)
       
-      log "#{stu} joined #{config[:room]}" if stu
+      if stu
+        stu.save if stu.dirty?
+        log "#{stu} joined #{config[:room]}"
+      end
     end
     
     # presence(:from => Regexp.new("^"+Blather::JID.new(room_jid).to_s+".*"), :type => nil) do |stanza|
@@ -52,12 +54,12 @@ class Choreographer < Sail::Agent
       stu.check_in!(location)
     end
     
-    event :organisms_assignment? do |stanza, data|
-      username = data['payload']['user_name']
-      organisms = [ data['payload']['first_organism'], data['payload']['second_organism'] ]
-      stu = lookup_student(username)
-      stu.organisms_assignment!(organisms)
-    end
+    # event :organisms_assignment? do |stanza, data|
+    #   username = data['payload']['username']
+    #   organisms = [ data['payload']['first_organism'], data['payload']['second_organism'] ]
+    #   stu = lookup_student(username)
+    #   stu.organisms_assignment!(organisms)
+    # end
     
     event :organism_present? do |stanza, data|
       username = data['origin']
@@ -107,25 +109,18 @@ class Choreographer < Sail::Agent
     event!(:start_step, {:step_id => step_id})
   end
   
-  def assign_organisms_to_student(stu)
-    event!(:organisms_assignment, {
-      :user_name => stu.username, 
-      :first_organism => "foo", 
-      :second_organism => "faa"
-    })
-  end
+  # def assign_organisms_to_student(stu)
+  #   event!(:organisms_assignment, {
+  #     :username => stu.username, 
+  #     :first_organism => "foo", 
+  #     :second_organism => "faa"
+  #   })
+  # end
   
-  def assign_location_to_student(stu)
+  def assign_location_for_guess(stu)
     # TODO: crowd management
-    # FIXME: should probably be "assign_location_to_group"
     
-    completed_rainforests = @mongo.collection('rainforest_guesses').find('username' => stu.username).
-      to_a.collect{|p| p['location']}.uniq
-      
-    remaining = Student::RAINFORESTS - completed_rainforests
-    location = remaining[rand(remaining.length-1)]
-    
-    log "Assigning #{location.inspect} to #{stu.username.inspect}; remaining locations: #{remaining.inspect}"
+    location = stu.determine_next_location_for_guess
     
     event!(:location_assignment, {
       :go_to_location => location,
@@ -133,11 +128,16 @@ class Choreographer < Sail::Agent
     })
   end
   
-  def assign_task_to_student(stu)
-    # TODO: need to rotate tasks
+  def assign_tasks_to_students_in_group(stu)
+    if stu.has_been_a_scribe?
+      task = ""
+    end
+      
     task = "scribe"
     
     log "Assigning task '#{task.inspect}' to #{stu.username.inspect}"
+    
+    stu.metadata.has_been_a_scribe = true
     
     event!(:task_assignment, {
       :task => task,
@@ -153,10 +153,10 @@ class Choreographer < Sail::Agent
     raise "assign_rationale_to_student: IMPLEMENT ME"
   end
   
-  def lookup_student(username)
+  def lookup_student(username, restoring = false)
     stu = @students[username]
       
-    unless stu
+    if stu.nil?
       log "Looking up user #{username.inspect} in Rollcall..."
 
       begin
@@ -174,6 +174,8 @@ class Choreographer < Sail::Agent
       log "#{username.inspect} loaded in state #{stu.state}"
       
       @students[username] = stu
+    elsif restoring # make sure the entry event gets triggered when we are restoring but not reloading
+      stu.state = stu.state
     end
     
     stu.agent = self

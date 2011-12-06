@@ -1,4 +1,7 @@
+require 'golem'
+
 require 'sail/rollcall/user'
+require 'sail/rollcall/group'
 
 class Student < Rollcall::User
   self.element_name = "user"
@@ -9,6 +12,7 @@ class Student < Rollcall::User
       'rainforest_c',
       'rainforest_d'
     ]
+  
   
   include Golem
   
@@ -21,6 +25,13 @@ class Student < Rollcall::User
   def username
     account.login
   end
+  
+  def group_code
+    groups.first.name
+  end
+  
+  delegate :mongo, :to => :agent
+  delegate :log,   :to => :agent
   
   def start_step_1
     agent.start_step(:STEP_1)
@@ -40,12 +51,12 @@ class Student < Rollcall::User
   
   def store_rainforest_guess(guess)
     agent.log "Storing rainforest guess: #{guess.inspect}"
-    agent.mongo.collection('rainforest_guesses').save(guess)
+    mongo.collection(:rainforest_guesses).save(guess)
   end
   
   def guess_received_for_all_locations?(guess)
     store_rainforest_guess(guess)
-    received = agent.mongo.collection('rainforest_guesses').find({'group_code' => guess['group_code']}).to_a
+    received = mongo.collection(:rainforest_guesses).find({'group_code' => guess['group_code']}).to_a
     agent.log "Group #{guess['group_code'].inspect} has so far submitted #{received.count} guesses..."
     RAINFORESTS.all?{|loc| received.any?{|r| r['location'] == loc}}
   end
@@ -54,32 +65,70 @@ class Student < Rollcall::User
     raise "IMPLEMENT ME"
   end
   
-  def store_assigned_organisms(organisms)
-    (1..organisms.length).each do |i|
-      metadata.send("assigned_organism_#{i}=", organisms[i-1])
-    end
-  end
+  # def store_assigned_organisms(organisms)
+  #   (1..organisms.length).each do |i|
+  #     metadata.send("assigned_organism_#{i}=", organisms[i-1])
+  #   end
+  # end
   
   def store_organism_presence(presence)
     #metadata.send("#{presence['location']_checked_for_presence}=", true)
     agent.log "Storing presence: #{presence.inspect}"
-    agent.mongo.collection('organism_presence').save(presence)
+    mongo.collection(:organism_presence).save(presence)
   end
   
   def organism_presence_received_for_all_locations?(presence)
     store_organism_presence(presence)
-    received = agent.mongo.collection('organism_presence').find({'username' => username}).to_a
+    received = mongo.collection(:organism_presence).find({'username' => username}).to_a
     RAINFORESTS.all?{|loc| received.any?{|r| r['location'] == loc}}
   end
   
+  def determine_next_location_for_guess
+    Rollcall::Group.site = Student.site if Rollcall::Group.site.blank?
+    
+    group = Rollcall::Group.find(group_code)
+    
+    group_location = nil
+    begin
+      group_location = group.metadata.assigned_location_for_guess
+    rescue NoMethodError # FIXME: shouldn't throw this if metadata is missing
+      group_location = nil
+    end
+    
+    if group_location
+      location = group_location
+      
+      log "Student #{username.inspect}'s group (#{group_code.inspect}) already assigned to #{location.inspect}; sending student there..."
+    else
+      completed_rainforests = mongo.collection(:rainforest_guesses).find('group_code' => group_code).
+        to_a.collect{|p| p['location']}.uniq
+      
+      remaining = Student::RAINFORESTS - completed_rainforests
+      location = remaining[rand(remaining.length-1)]
+    
+      log "Assigning #{location.inspect} to #{username.inspect} (#{group_code.inspect}); remaining locations: #{remaining.inspect}"
+      
+      group.metadata.assigned_location_for_guess = location
+      group.save
+    end
+    
+    return location
+  end
+  
   def announce_completed_rainforests
-    completed_rainforests = agent.mongo.collection('organism_presence').find('username' => username).
+    completed_rainforests = mongo.collection(:organism_presence).find('username' => username).
       to_a.collect{|p| p['location']}.uniq
       
-    agent.event!(:rainforests_complete_announcement, {
-      :user_name => username,
+    agent.event!(:rainforests_completed_announcement, {
+      :username => username,
       :completed_rainforests => completed_rainforests
     })
+  end
+  
+  def clear_group_location_assignment
+    group = Rollcall::Group.find(group_code)
+    group.metadata.assigned_location_for_guess = nil
+    group.save
   end
   
   define_statemachine do
@@ -99,30 +148,30 @@ class Student < Rollcall::User
   
     state :LOGGED_IN do
       # we're assuming that they're checking in for the "room"
-      on :check_in, :to => :WAITING_FOR_ORGANISMS_ASSIGNMENT, :if => proc {|student, loc| loc == "room"},
-        :action => :start_step_1
+      on :check_in do
+        transition :to => :IN_ROOM do
+          guard(:failure_message => "the student must check in at the room entrance first") {|student, loc| loc == "room"}
+          action :start_step_1
+        end
+      end
     end
     
-    state :WAITING_FOR_ORGANISMS_ASSIGNMENT do
-      enter {|student| Student.agent.assign_organisms_to_student(student)}
-      on :organisms_assignment, :to => :ORGANISMS_ASSIGNED, :action => :store_assigned_organisms
-    end
-    
-    state :ORGANISMS_ASSIGNED do
+    state :IN_ROOM do
       on :check_in, :to => :AT_PRESENCE_LOCATION
     end
     
     state :AT_PRESENCE_LOCATION do
+      enter :announce_completed_rainforests
       on :organism_present do
         transition :to => :WAITING_FOR_LOCATION_FOR_GUESS, :if => :organism_presence_received_for_all_locations?, 
           :action => :start_step_2
-        transition :to => :ORGANISMS_ASSIGNED, 
-          :action => :announce_completed_rainforests # else
+        transition :to => :IN_ROOM
       end
+      on :check_in, :to => :AT_PRESENCE_LOCATION
     end
     
     state :WAITING_FOR_LOCATION_FOR_GUESS do
-      enter {|student| Student.agent.assign_location_to_student(student) }
+      enter {|student| Student.agent.assign_location_for_guess(student) }
       on :location_assignment, :to => :GUESS_LOCATION_ASSIGNED do
         action {|student, loc| student.metadata.currently_assigned_location = loc }
       end
@@ -137,7 +186,7 @@ class Student < Rollcall::User
     end
     
     state :AT_ASSIGNED_GUESS_LOCATION do
-      enter {|student| Student.agent.assign_task_to_student(student) }
+      enter {|student| Student.agent.assign_tasks_to_students_in_group(student.group) if student.all_group_members_at_assigned_location? }
       on :task_assignment, :to => :GUESS_TASK_ASSIGNED do
         action {|student, task| student.metadata.currently_assigned_task = task }
       end
@@ -147,7 +196,8 @@ class Student < Rollcall::User
       on :rainforest_guess_submitted do
         transition :to => :WAITING_FOR_INTERVIEWEES_ASSIGNMENT, :if => :guess_received_for_all_locations?,
           :action => :start_step_3
-        transition :to => :WAITING_FOR_LOCATION_FOR_GUESS
+        transition :to => :WAITING_FOR_LOCATION_FOR_GUESS,
+          :action => :clear_group_location_assignment
       end
     end
     

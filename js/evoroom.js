@@ -215,8 +215,13 @@ var EvoRoom = {
         },
 
         connected: function(ev) {
-            Sail.app.setupPageLayout();
-            Sail.app.restoreState();
+            Sail.app.rollcall.request(Sail.app.rollcall.url + "/users/"+Sail.app.session.account.login+".json", "GET", {}, function(data) {
+                Sail.app.currentGroupCode = data.user.groups[0].name;
+                Sail.app.user_metadata = data.user.metadata;
+                console.log('metadata assigned');
+                Sail.app.setupPageLayout();
+                Sail.app.restoreState(); 
+            });
         },
 
         unauthenticated: function(ev) {
@@ -260,13 +265,8 @@ var EvoRoom = {
             Rollcall.Authenticator.requestLogin();
         } else {
             Sail.app.rollcall.fetchSessionForToken(Sail.app.token, function(data) {
-                Sail.app.session = data.session;
-                Sail.app.rollcall.request(Sail.app.rollcall.url + "/users/"+Sail.app.session.account.login+".json",
-                    "GET", {}, function(data) {
-                        Sail.app.currentGroupCode = data.user.groups[0].name;
-                        Sail.app.user_metadata = data.user.metadata;
-                        $(Sail.app).trigger('authenticated');
-                    });
+                    Sail.app.session = data.session;
+                    $(Sail.app).trigger('authenticated');
                 },
                 function(error) {
                     console.warn("Token '"+Sail.app.token+"' is invalid. Will try to re-authenticate...");
@@ -323,7 +323,7 @@ var EvoRoom = {
                 window.plugins.barcodeScanner.scan(Sail.app.barcodeScanRoomLoginSuccess, Sail.app.barcodeScanRoomLoginFailure);
             } else {
                 // trigger the error handler to get alternative
-                $(Sail.app).trigger('barcodeScanRoomLoginFailure');
+                Sail.app.barcodeScanRoomLoginFailure('No scanner, probably desktop browser');
             }
         });
 
@@ -360,7 +360,7 @@ var EvoRoom = {
                 window.plugins.barcodeScanner.scan(Sail.app.barcodeScanRainforestSuccess, Sail.app.barcodeScanRainforestFailure);
             } else {
                 // trigger the error handler to get alternative
-                $(Sail.app).trigger('barcodeScanRainforestFailure');
+                Sail.app.barcodeScanRainforestFailure('No scanner, probably desktop browser');
             }
         });
 
@@ -416,7 +416,7 @@ var EvoRoom = {
                 window.plugins.barcodeScanner.scan(Sail.app.barcodeScanRainforestSuccess, Sail.app.barcodeScanRainforestFailure);
             } else {
                 // trigger the error handler to get alternative
-                $(Sail.app).trigger('barcodeScanRainforestFailure');
+                Sail.app.barcodeScanRainforestFailure('No scanner, probably desktop browser');
             }
         });
 
@@ -608,6 +608,20 @@ var EvoRoom = {
             $('#rotation-intro .current-rainforest').text(Sail.app.formatRainforestString(Sail.app.user_metadata.currently_assigned_location));
             $('#rotation-next-rainforest .next-rainforest').text(Sail.app.formatRainforestString(Sail.app.user_metadata.currently_assigned_location));
             $('#rotation-next-rainforest').show();
+        } else if (Sail.app.user_metadata.state === 'AT_ASSIGNED_GUESS_LOCATION') {
+            // wait for task_assignment message (from agent once all team members are at this state)
+            Sail.app.targetRainforest = Sail.app.user_metadata.currently_assigned_location;
+            $('#loading-page').show();
+        } else if (Sail.app.user_metadata.state === 'GUESS_TASK_ASSIGNED') {
+            Sail.app.currentRainforest = Sail.app.user_metadata.currently_assigned_location;
+            if (Sail.app.user_metadata.currently_assigned_task === 'scribe') {
+                $('#rotation-note-taker').show();
+            } else {
+                $('#rotation-field-guide-and-prediction').show();
+            }
+        }
+        else {
+            console.warn('restoreState: read state <'+Sail.app.user_metadata.state+ '> which is not handled currently.');
         }
     },
 
