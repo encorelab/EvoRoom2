@@ -663,6 +663,10 @@ var EvoRoom = {
             } else {
                 $('#rotation-field-guide-and-prediction').show();
             }
+        } else if (Sail.app.user_metadata.state === 'INTERVIEWEES_ASSIGNED') {
+            $('#interview-intro .first-interviewee').text(Sail.app.user_metadata.interviewee_1);
+            $('#interview-intro .second-interviewee').text(Sail.app.user_metadata.interviewee_2);
+            $('#interview-intro').show();
         }
         else {
             console.warn('restoreState: read state <'+Sail.app.user_metadata.state+ '> which is not handled currently.');
