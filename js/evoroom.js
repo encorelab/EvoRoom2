@@ -667,8 +667,8 @@ var EvoRoom = {
     },
 
     submitOrganismsPresent: function() {
-        var formattedOrg1 = Sail.app.formatOrganismString(Sail.app.organism_1);
-        var formattedOrg2 = Sail.app.formatOrganismString(Sail.app.organism_2);
+        var formattedOrg1 = Sail.app.formatOrganismString(Sail.app.user_metadata.assigned_organism_1);
+        var formattedOrg2 = Sail.app.formatOrganismString(Sail.app.user_metadata.assigned_organism_2);
         var formattedRadio1 = Sail.app.formatStringToBoolean($('input:radio[name=first-organism-yn]:checked').val());
         var formattedRadio2 = Sail.app.formatStringToBoolean($('input:radio[name=second-organism-yn]:checked').val());
         var sev = new Sail.Event('organism_present', {
