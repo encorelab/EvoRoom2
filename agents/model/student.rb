@@ -30,27 +30,32 @@ class Student < Rollcall::User
     groups.first.name
   end
   
+  def evoroom_group
+    Rollcall::Group.site = Student.site if Rollcall::Group.site.blank?
+    Rollcall::Group.find(group_code)
+  end
+  
   delegate :mongo, :to => :agent
   delegate :log,   :to => :agent
   
   def start_step_1
-    agent.start_step(:STEP_1)
+    agent.start_step(username, :STEP_1)
   end
   
   def start_step_2
-    agent.start_step(:STEP_2)
+    agent.start_step(username, :STEP_2)
   end
   
   def start_step_3
-    agent.start_step(:STEP_3)
+    agent.start_step(username, :STEP_3)
   end
   
   def start_step_4
-    agent.start_step(:STEP_4)
+    agent.start_step(username, :STEP_4)
   end
   
   def store_rainforest_guess(guess)
-    agent.log "Storing rainforest guess: #{guess.inspect}"
+    log "Storing rainforest guess: #{guess.inspect}"
     mongo.collection(:rainforest_guesses).save(guess)
   end
   
@@ -58,11 +63,73 @@ class Student < Rollcall::User
     store_rainforest_guess(guess)
     received = mongo.collection(:rainforest_guesses).find({'group_code' => guess['group_code']}).to_a
     agent.log "Group #{guess['group_code'].inspect} has so far submitted #{received.count} guesses..."
-    RAINFORESTS.all?{|loc| received.any?{|r| r['location'] == loc}}
+    have_all = RAINFORESTS.all?{|loc| received.any?{|r| r['location'] == loc}}
+    
+    log "#{self} has not yet submitted a guess for all locations" unless have_all
+    
+    return have_all
   end
   
-  def interview_submitted_for_all_interviewees?
-    raise "IMPLEMENT ME"
+  def interview_submitted_for_all_interviewees?(interview = nil)
+    mongo.collection('interviews').save(interview) if interview
+    
+    int_1 = nil
+    begin
+      int_1 = metadata.interviewee_1
+    rescue NoMethodError
+    end
+    
+    int_2 = nil
+    begin
+      int_2 = metadata.interviewee_2
+    rescue NoMethodError
+    end
+    
+    have_first = true
+    if int_1
+      have_first = mongo.collection('interviews').find_one({:username => username, :interviewee => int_1})
+    end
+    have_second = true
+    if int_2
+      have_second = mongo.collection('interviews').find_one({:username => username, :interviewee => int_2})
+    end
+    
+    if have_first && have_second
+      log "#{self} has completed all required interviews"
+      return true
+    else
+      still_left = []
+      still_left << !have_first && int_1
+      still_left << !have_second && int_2
+      log "#{self} must still interview #{still_left.inspect}"
+      return false
+    end
+  end
+  
+  def all_usernames_currently_in_smartroom
+    locs = mongo.collection(:location_tracking).find({'latest' => true}).to_a
+    locs.delete_if{|loc| Time.parse(loc['timestamp']) < Time.now - 20.minutes}
+    return locs.collect{|loc| loc['username']}
+  end
+  
+  def determine_interviewees
+    possible_interviewee_usernames = all_usernames_currently_in_smartroom
+    
+    possible_interviewee_usernames -= [self.username] # remove self
+    possible_interviewee_usernames -= group_members.collect{|m| m.account.login} # remove own group members
+    
+    log "Assigning interviewees to #{self} (selecting from users: #{possible_interviewee_usernames})..."
+    
+    # possible_interviewees = []
+    #     possible_interviewee_usernames.each do |u|
+    #       possible_interviewees << Student.find(u)
+    #     end
+    
+    first = possible_interviewee_usernames[rand(possible_interviewee_usernames.length - 1)]
+    possible_interviewee_usernames -= [first]
+    second = possible_interviewee_usernames[rand(possible_interviewee_usernames.length - 1)]
+    
+    return [first, second]
   end
   
   # def store_assigned_organisms(organisms)
@@ -70,6 +137,23 @@ class Student < Rollcall::User
   #     metadata.send("assigned_organism_#{i}=", organisms[i-1])
   #   end
   # end
+  
+  
+  def determine_next_location_for_guess
+    if group_location_assignment
+      location = group_location_assignment
+      log "Student #{username.inspect}'s group (#{group_code.inspect}) already assigned to #{location.inspect}; sending student there..."
+    else
+      remaining = Student::RAINFORESTS - rainforests_that_the_user_has_submitted_a_guess_for
+      location = remaining[rand(remaining.length-1)]
+      
+      log "Assigning #{location.inspect} to #{username.inspect} (#{group_code.inspect}); remaining locations: #{remaining.inspect}"
+      
+      self.group_location_assignment = location
+    end
+    
+    return location
+  end
   
   def store_organism_presence(presence)
     #metadata.send("#{presence['location']_checked_for_presence}=", true)
@@ -80,53 +164,86 @@ class Student < Rollcall::User
   def organism_presence_received_for_all_locations?(presence)
     store_organism_presence(presence)
     received = mongo.collection(:organism_presence).find({'username' => username}).to_a
-    RAINFORESTS.all?{|loc| received.any?{|r| r['location'] == loc}}
+    have_all = RAINFORESTS.all?{|loc| received.any?{|r| r['location'] == loc}}
+    
+    log "#{self} has not yet submitted a presence observation for all locations" unless have_all
+    
+    return have_all
   end
   
-  def determine_next_location_for_guess
-    Rollcall::Group.site = Student.site if Rollcall::Group.site.blank?
+  def group_members
+    group = self.evoroom_group
+    group.members
+  end
+  
+  def group_members_current_locations
+    current_locations = {}
+    group_members.each do |m| 
+      # TODO: use Sail::Query instead
+      latest = mongo.collection(:location_tracking).find_one({'latest' => true, 'username' => m.account.login})
+      current_locations[m.account.login] = latest && latest['location']
+    end
+    return current_locations
+  end
+  
+  def all_group_members_at_my_assigned_location?
+    raise "#{self} is not currently assigned to a location!" unless metadata.currently_assigned_location
+    my_assigned_location = metadata.currently_assigned_location
     
-    group = Rollcall::Group.find(group_code)
+    at_my_location = []
+    not_at_my_location = []
     
-    group_location = nil
-    begin
-      group_location = group.metadata.assigned_location_for_guess
-    rescue NoMethodError # FIXME: shouldn't throw this if metadata is missing
-      group_location = nil
+    group_members_current_locations.each do |username, location| 
+      if location == my_assigned_location
+        at_my_location << username
+      else
+        not_at_my_location << username
+      end
     end
     
-    if group_location
-      location = group_location
-      
-      log "Student #{username.inspect}'s group (#{group_code.inspect}) already assigned to #{location.inspect}; sending student there..."
+    if not_at_my_location.empty?
+      log "#{self} has all group members at his/her assigned location. Yay!"
     else
-      completed_rainforests = mongo.collection(:rainforest_guesses).find('group_code' => group_code).
-        to_a.collect{|p| p['location']}.uniq
-      
-      remaining = Student::RAINFORESTS - completed_rainforests
-      location = remaining[rand(remaining.length-1)]
-    
-      log "Assigning #{location.inspect} to #{username.inspect} (#{group_code.inspect}); remaining locations: #{remaining.inspect}"
-      
-      group.metadata.assigned_location_for_guess = location
-      group.save
+      log "#{self} still waiting on #{not_at_my_location.inspect}..."
     end
     
-    return location
+    return not_at_my_location.empty? 
   end
   
   def announce_completed_rainforests
     completed_rainforests = mongo.collection(:organism_presence).find('username' => username).
       to_a.collect{|p| p['location']}.uniq
-      
+    
+    log "#{self} has submitted a presence observation for: #{completed_rainforests.inspect}"
+    
     agent.event!(:rainforests_completed_announcement, {
       :username => username,
       :completed_rainforests => completed_rainforests
     })
   end
   
+  def rainforests_that_the_user_has_submitted_a_guess_for
+    mongo.collection(:rainforest_guesses).find('group_code' => group_code).
+      to_a.collect{|p| p['location']}.uniq
+  end
+  
+  def group_location_assignment
+    group = self.evoroom_group
+    begin
+      group.metadata.assigned_location_for_guess
+    rescue NoMethodError # FIXME: shouldn't throw this if metadata is missing
+      nil
+    end
+  end
+  
+  def group_location_assignment=(location)
+    group = self.evoroom_group
+    group.metadata.assigned_location_for_guess = location
+    group.save
+  end
+  
   def clear_group_location_assignment
-    group = Rollcall::Group.find(group_code)
+    group = self.evoroom_group
     group.metadata.assigned_location_for_guess = nil
     group.save
   end
@@ -186,7 +303,7 @@ class Student < Rollcall::User
     end
     
     state :AT_ASSIGNED_GUESS_LOCATION do
-      enter {|student| Student.agent.assign_tasks_to_students_in_group(student.group) if student.all_group_members_at_assigned_location? }
+      enter {|student| Student.agent.assign_tasks_to_group(student.group_code) if student.all_group_members_at_my_assigned_location? }
       on :task_assignment, :to => :GUESS_TASK_ASSIGNED do
         action {|student, task| student.metadata.currently_assigned_task = task }
       end
@@ -207,7 +324,12 @@ class Student < Rollcall::User
     end
     
     state :INTERVIEWEES_ASSIGNED do
-      on :interview_started, :to => :INTERVIEWING
+      on :interview_started, :to => :INTERVIEWING do
+        action do |student, first, second|
+          student.metadata.interviewee_1 = first
+          student.metadata.interviewee_2 = second
+        end
+      end
     end
     
     state :INTERVIEWING do

@@ -101,12 +101,52 @@ class Choreographer < Sail::Agent
       guess['timestamp'] = data['timestamp']
       guess['username'] = username
       
-      lookup_student(username).rainforest_guess_submitted!(guess)
+      stu = lookup_student(username)
+      
+      stu.group_members.each do |m|
+        stu2 = lookup_student(m.account.login)
+        stu2.rainforest_guess_submitted!(guess)
+      end
+    end
+    
+    event :interview_submitted? do |stanza, data|
+      username = data['origin']
+      
+      lookup_student(username).interview_submitted!(data['payload'])
+    end
+    
+    event :interviewees_assigned? do |stanza, data|
+      username = data['payload']['username']
+      
+      first = data['payload']['first_interviewee']
+      second = data['payload']['second_interviewee']
+      
+      lookup_student(username).interviewees_assigned!(first, second)
+    end
+    
+    event :test_student_method? do |stanza, data|
+      username = data['payload']['username']
+      method = data['payload']['method']
+      args = data['payload']['args']
+      
+      begin
+        stu = lookup_student(username)
+        if args.nil? || args.empty?
+          result = stu.send(method)
+        else
+          result = stu.send(method, *args)
+        end
+        log "#{method}: #{result.inspect}", :DEBUG
+      rescue => e
+        log "#{method}: #{e}", :ERROR
+        raise e
+      end
     end
   end
   
-  def start_step(step_id)
-    event!(:start_step, {:step_id => step_id})
+  def start_step(username, step_id)
+    stu = lookup_student(username)
+    event!(:start_step, {:step_id => step_id, :username => username, :group_code => stu.group_code})
   end
   
   # def assign_organisms_to_student(stu)
@@ -128,25 +168,45 @@ class Choreographer < Sail::Agent
     })
   end
   
-  def assign_tasks_to_students_in_group(stu)
-    if stu.has_been_a_scribe?
-      task = ""
-    end
+  def fetch_group(id)
+    Rollcall::Group.site = Student.site if Rollcall::Group.site.blank?
+    Rollcall::Group.find(id)
+  end
+  
+  def assign_tasks_to_group(group_code)
+    log "Assigning tasks to group #{group_code.inspect}"
+    
+    group_members = fetch_group(group_code).members
+    scribe_idx = rand(group_members.length-1)
+    
+    (0..group_members.size-1).each do |i|
+      username = group_members[i].account.login
       
-    task = "scribe"
-    
-    log "Assigning task '#{task.inspect}' to #{stu.username.inspect}"
-    
-    stu.metadata.has_been_a_scribe = true
-    
-    event!(:task_assignment, {
-      :task => task,
-      :username => stu.username
-    })
+      if i == scribe_idx
+        task = "scribe"
+      else
+        task = "other"
+      end
+      
+      log "Assigning task '#{task.inspect}' to #{username.inspect}"
+      
+      event!(:task_assignment, {
+        :task => task,
+        :username => username
+      })
+    end
   end
   
   def assign_interviewees_to_student(stu)
-    raise "assign_interviewees_to_student: IMPLEMENT ME"
+    #{"eventType":"test_student_method","payload":{"username":"EliOtis","method":"determine_interviewees"}}
+    
+    interviewees = stu.determine_interviewees
+    
+    event!(:interviewees_assigned, {
+      "username" => stu.username,
+      "first_interviewee" => interviewees[0],
+      "second_interviewee" => interviewees[1]
+    })
   end
   
   def assign_rationale_to_student(stu)
@@ -158,24 +218,25 @@ class Choreographer < Sail::Agent
       
     if stu.nil?
       log "Looking up user #{username.inspect} in Rollcall..."
-
+      
       begin
         stu = Student.find(username)
       rescue ActiveResource::ResourceNotFound
         log "#{username.inspect} not found in Rollcall..."
         return nil
       end
-
+      
       unless stu.kind == "Student"
-        log "#{username.inspect} is not a student; will be ignored."
-        return nil
+       log "#{username.inspect} is not a student; will be ignored."
+       return nil
       end
       
       log "#{username.inspect} loaded in state #{stu.state}"
       
       @students[username] = stu
     elsif restoring # make sure the entry event gets triggered when we are restoring but not reloading
-      stu.state = stu.state
+      stu_from_rollcall = Student.find(username)
+      stu.state = stu_from_rollcall.state
     end
     
     stu.agent = self

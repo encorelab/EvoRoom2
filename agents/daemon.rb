@@ -28,3 +28,4 @@ DB = "evoroom"
 
 
 @daemon.start
+#@daemon.start_interactive
