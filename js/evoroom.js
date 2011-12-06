@@ -587,9 +587,33 @@ var EvoRoom = {
             Sail.app.hidePageElements();
             $('#final-picks-choice').show();
         });
+        
+        // on-click listeners for rainforest QR scanning error resolution
+        $('#final-picks-scan-failure .big-button').click(function() {
+            // hide everything
+            Sail.app.hidePageElements();
+            // show start page
+            $('#final-picks-choice').show();
+        });
+
+        $('#final-picks-scan-failure .small-error-resolver-button').click(function() {
+            // send out event check_in
+            Sail.app.currentRainforest = $(this).data('rainforest');
+            Sail.app.submitCheckIn();
+            // hide everything
+            Sail.app.hidePageElements();
+            $('#final-picks-debrief').show();
+        });
 
         $('#final-picks-choice .big-button').click(function() {
-            window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRainforest, Sail.app.barcodeScanFailure);
+            // trigger the QR scan screen/module to scan rainforests
+            if (window.plugins.barcodeScanner) {
+                window.plugins.barcodeScanner.scan(Sail.app.barcodeScanFinalPicksSuccess, Sail.app.barcodeScanFinalPicksFailure);
+            } else {
+                // call the error handler to get alternative
+                Sail.app.barcodeScanFinalPicksFailure('No scanner, probably desktop browser');
+            }
+            //window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRainforest, Sail.app.barcodeScanFailure);
             Sail.app.hidePageElements();
             $('#final-picks-debrief').show();
         });
@@ -760,6 +784,24 @@ var EvoRoom = {
         // hide everything
         Sail.app.hidePageElements();
         $('#rainforest-scan-failure').show();
+    },
+    
+    barcodeScanFinalPicksSuccess: function(result) {
+        console.log("Got Barcode: " +result);
+        // send out event check_in
+        Sail.app.currentRainforest = result;
+        Sail.app.submitCheckIn();
+        // hide everything
+        Sail.app.hidePageElements();
+        // show waiting page
+        $('#final-picks-debrief').show();
+    },
+
+    barcodeScanFinalPicksFailure: function(msg) {
+        console.warn("SCAN FAILED: "+msg);
+        // hide everything
+        Sail.app.hidePageElements();
+        $('#final-picks-scan-failure').show();
     },
 
     barcodeScanCheckLocationAssignmentSuccess: function(result) {
