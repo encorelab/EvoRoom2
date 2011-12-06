@@ -20,7 +20,8 @@ var EvoRoom = {
             /********************************************* INCOMING EVENTS *******************************************/
             start_step: function(ev) {
                 if (ev.payload.username && ev.payload.username === Sail.app.session.account.login) {
-                    if (ev.payload.step_id) {
+                    if (ev.payload.step_id) {ev
+                        
                         if (ev.payload.step_id === "STEP_1") {
                             console.log("Received start_step for step1 - nothing done with it right now!");
                         } else if (ev.payload.step_id === "STEP_2") {
@@ -143,13 +144,20 @@ var EvoRoom = {
                         $('#rotation-prediction .current-rainforest').text(Sail.app.formatRainforestString(Sail.app.currentRainforest));
                         $('#rotation-prediction').show();
                     }
-                    else if (ev.payload.task === "guide_prediction_looker_upper") {
+                    else if (ev.payload.task === "other") {
                         $('#rotation-field-guide .current-rainforest').text(Sail.app.formatRainforestString(Sail.app.currentRainforest));
                         $('#rotation-field-guide-and-prediction').show();
                     }
                 }
                 else {
                     console.warn("task_assignment event received, but payload is incomplete");
+                }
+            },
+            
+            rainforest_guess_submitted: function(ev) {
+                if ((ev.payload.groupCode === Sail.app.currentGroupCode) && (ev.payload.author != Sail.app.session.account.login)) {
+                    Sail.app.hidePageElements();
+                    $('#loading-page').show();
                 }
             },
 
@@ -214,11 +222,29 @@ var EvoRoom = {
         },
 
         connected: function(ev) {
-            Sail.app.setupPageLayout();
-            Sail.app.restoreState();
+            Sail.app.rollcall.request(Sail.app.rollcall.url + "/users/"+Sail.app.session.account.login+".json", "GET", {}, function(data) {
+                Sail.app.currentGroupCode = data.user.groups[0].name;
+                Sail.app.user_metadata = data.user.metadata;
+                console.log('metadata assigned');
+                Sail.app.setupPageLayout();
+                Sail.app.restoreState(); 
+            });
         },
 
         unauthenticated: function(ev) {
+            Sail.app.user_metadata = null;
+            Sail.app.currentGroupCode = null;
+            Sail.app.currentRainforest = false;
+            Sail.app.organismsRainforestsCompleted = false;
+            Sail.app.firstRainforestAssigned = false;
+            Sail.app.targetRainforest = null;
+            Sail.app.rotationRainforestsCompleted = false;
+            Sail.app.firstInterview = false;
+            Sail.app.secondInterview = false;
+            Sail.app.rationaleAssigned = null;
+            
+            Sail.app.hidePageElements();
+            
             Rollcall.Authenticator.requestRun();
         }
     },
@@ -259,13 +285,8 @@ var EvoRoom = {
             Rollcall.Authenticator.requestLogin();
         } else {
             Sail.app.rollcall.fetchSessionForToken(Sail.app.token, function(data) {
-                Sail.app.session = data.session;
-                Sail.app.rollcall.request(Sail.app.rollcall.url + "/users/"+Sail.app.session.account.login+".json",
-                    "GET", {}, function(data) {
-                        Sail.app.currentGroupCode = data.user.groups[0].name;
-                        Sail.app.user_metadata = data.user.metadata;
-                        $(Sail.app).trigger('authenticated');
-                    });
+                    Sail.app.session = data.session;
+                    $(Sail.app).trigger('authenticated');
                 },
                 function(error) {
                     console.warn("Token '"+Sail.app.token+"' is invalid. Will try to re-authenticate...");
@@ -282,7 +303,7 @@ var EvoRoom = {
         $('#survey-welcome').hide();
         $('#rainforest-scan-failure').hide();
         $('#rotation-scan-failure').hide();
-        $('#student-chosen-organisms').hide();
+        // $('#student-chosen-organisms').hide();     // hidePageElements is called repeatedly during step 1, so we can't include this one
         $('#survey-organisms').hide();
         $('#survey-organisms .next-rainforest').hide();
         $('#survey-organisms .finished').hide();
@@ -330,7 +351,8 @@ var EvoRoom = {
         $('#room-scan-failure .big-button').click(function() {
             // hide everything
             Sail.app.hidePageElements();
-            // show start page
+            // show start page and organisms
+            $('#student-chosen-organisms').show();
             $('#log-in-success').show();
         });
 
@@ -352,6 +374,7 @@ var EvoRoom = {
         });
 
         $('#survey-welcome .big-button').click(function() {
+            
             // trigger the QR scan screen/module to scan rainforests
             if (window.plugins.barcodeScanner) {
                 window.plugins.barcodeScanner.scan(Sail.app.barcodeScanRainforestSuccess, Sail.app.barcodeScanRainforestFailure);
@@ -376,6 +399,7 @@ var EvoRoom = {
             // hide everything
             Sail.app.hidePageElements();
             // wait
+            $('#student-chosen-organisms').show();
             $('#loading-page').show();
         });
 
@@ -419,6 +443,7 @@ var EvoRoom = {
         // on-click event to finish step1
         $('#survey-organisms .small-button').click(function() {
             Sail.app.hidePageElements();
+            $('#student-chosen-organisms').hide();
             
             // we also need to submit the organisms_present event
             if ( $('.first-radios').is(':checked') && $('.second-radios').is(':checked') ) {
@@ -582,9 +607,33 @@ var EvoRoom = {
             Sail.app.hidePageElements();
             $('#final-picks-choice').show();
         });
+        
+        // on-click listeners for rainforest QR scanning error resolution
+        $('#final-picks-scan-failure .big-button').click(function() {
+            // hide everything
+            Sail.app.hidePageElements();
+            // show start page
+            $('#final-picks-choice').show();
+        });
+
+        $('#final-picks-scan-failure .small-error-resolver-button').click(function() {
+            // send out event check_in
+            Sail.app.currentRainforest = $(this).data('rainforest');
+            Sail.app.submitCheckIn();
+            // hide everything
+            Sail.app.hidePageElements();
+            $('#final-picks-debrief').show();
+        });
 
         $('#final-picks-choice .big-button').click(function() {
-            window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRainforest, Sail.app.barcodeScanFailure);            
+            // trigger the QR scan screen/module to scan rainforests
+            if (window.plugins.barcodeScanner) {
+                window.plugins.barcodeScanner.scan(Sail.app.barcodeScanFinalPicksSuccess, Sail.app.barcodeScanFinalPicksFailure);
+            } else {
+                // call the error handler to get alternative
+                Sail.app.barcodeScanFinalPicksFailure('No scanner, probably desktop browser');
+            }
+            //window.plugins.barcodeScanner.scan(Sail.app.barcodeScanSuccessRainforest, Sail.app.barcodeScanFailure);
             Sail.app.hidePageElements();
             $('#final-picks-debrief').show();
         });
@@ -603,6 +652,20 @@ var EvoRoom = {
             $('#rotation-intro .current-rainforest').text(Sail.app.formatRainforestString(Sail.app.user_metadata.currently_assigned_location));
             $('#rotation-next-rainforest .next-rainforest').text(Sail.app.formatRainforestString(Sail.app.user_metadata.currently_assigned_location));
             $('#rotation-next-rainforest').show();
+        } else if (Sail.app.user_metadata.state === 'AT_ASSIGNED_GUESS_LOCATION') {
+            // wait for task_assignment message (from agent once all team members are at this state)
+            Sail.app.targetRainforest = Sail.app.user_metadata.currently_assigned_location;
+            $('#loading-page').show();
+        } else if (Sail.app.user_metadata.state === 'GUESS_TASK_ASSIGNED') {
+            Sail.app.currentRainforest = Sail.app.user_metadata.currently_assigned_location;
+            if (Sail.app.user_metadata.currently_assigned_task === 'scribe') {
+                $('#rotation-note-taker').show();
+            } else {
+                $('#rotation-field-guide-and-prediction').show();
+            }
+        }
+        else {
+            console.warn('restoreState: read state <'+Sail.app.user_metadata.state+ '> which is not handled currently.');
         }
     },
 
@@ -617,8 +680,8 @@ var EvoRoom = {
     },
 
     submitOrganismsPresent: function() {
-        var formattedOrg1 = Sail.app.formatOrganismString(Sail.app.organism_1);
-        var formattedOrg2 = Sail.app.formatOrganismString(Sail.app.organism_2);
+        var formattedOrg1 = Sail.app.formatOrganismString(Sail.app.user_metadata.assigned_organism_1);
+        var formattedOrg2 = Sail.app.formatOrganismString(Sail.app.user_metadata.assigned_organism_2);
         var formattedRadio1 = Sail.app.formatStringToBoolean($('input:radio[name=first-organism-yn]:checked').val());
         var formattedRadio2 = Sail.app.formatStringToBoolean($('input:radio[name=second-organism-yn]:checked').val());
         var sev = new Sail.Event('organism_present', {
@@ -741,6 +804,24 @@ var EvoRoom = {
         // hide everything
         Sail.app.hidePageElements();
         $('#rainforest-scan-failure').show();
+    },
+    
+    barcodeScanFinalPicksSuccess: function(result) {
+        console.log("Got Barcode: " +result);
+        // send out event check_in
+        Sail.app.currentRainforest = result;
+        Sail.app.submitCheckIn();
+        // hide everything
+        Sail.app.hidePageElements();
+        // show waiting page
+        $('#final-picks-debrief').show();
+    },
+
+    barcodeScanFinalPicksFailure: function(msg) {
+        console.warn("SCAN FAILED: "+msg);
+        // hide everything
+        Sail.app.hidePageElements();
+        $('#final-picks-scan-failure').show();
     },
 
     barcodeScanCheckLocationAssignmentSuccess: function(result) {
