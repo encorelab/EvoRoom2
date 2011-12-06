@@ -153,6 +153,13 @@ var EvoRoom = {
                     console.warn("task_assignment event received, but payload is incomplete");
                 }
             },
+            
+            rainforest_guess_submitted: function(ev) {
+                if ((ev.payload.groupCode === Sail.app.currentGroupCode) && (ev.payload.author != Sail.app.session.account.login)) {
+                    Sail.app.hidePageElements();
+                    $('#loading-page').show();
+                }
+            },
 
             /*****************************************EVENTS ADDED FOR STEP 3***********************************************/
 
