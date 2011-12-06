@@ -283,7 +283,7 @@ var EvoRoom = {
         $('#survey-welcome').hide();
         $('#rainforest-scan-failure').hide();
         $('#rotation-scan-failure').hide();
-        $('#student-chosen-organisms').hide();
+        // $('#student-chosen-organisms').hide();     // hidePageElements is called repeatedly during step 1, so we can't include this one
         $('#survey-organisms').hide();
         $('#survey-organisms .next-rainforest').hide();
         $('#survey-organisms .finished').hide();
@@ -331,7 +331,8 @@ var EvoRoom = {
         $('#room-scan-failure .big-button').click(function() {
             // hide everything
             Sail.app.hidePageElements();
-            // show start page
+            // show start page and organisms
+            $('#student-chosen-organisms').show();
             $('#log-in-success').show();
         });
 
@@ -353,6 +354,7 @@ var EvoRoom = {
         });
 
         $('#survey-welcome .big-button').click(function() {
+            
             // trigger the QR scan screen/module to scan rainforests
             if (window.plugins.barcodeScanner) {
                 window.plugins.barcodeScanner.scan(Sail.app.barcodeScanRainforestSuccess, Sail.app.barcodeScanRainforestFailure);
@@ -377,6 +379,7 @@ var EvoRoom = {
             // hide everything
             Sail.app.hidePageElements();
             // wait
+            $('#student-chosen-organisms').show();
             $('#loading-page').show();
         });
 
@@ -420,6 +423,7 @@ var EvoRoom = {
         // on-click event to finish step1
         $('#survey-organisms .small-button').click(function() {
             Sail.app.hidePageElements();
+            $('#student-chosen-organisms').hide();
             
             // we also need to submit the organisms_present event
             if ( $('.first-radios').is(':checked') && $('.second-radios').is(':checked') ) {
