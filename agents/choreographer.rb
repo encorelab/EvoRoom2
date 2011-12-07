@@ -162,8 +162,8 @@ class Choreographer < Sail::Agent
     end
     
     event :rationale_assigned? do |stanza, data|
-      username = data['origin']
-      rationale = data['origin']['question']
+      username = data['payload']['username']
+      rationale = data['payload']['question']
       
       lookup_student(username).rationale_assigned!(rationale)
     end
@@ -249,7 +249,7 @@ class Choreographer < Sail::Agent
   def assign_rationale(stu)
     rationale = stu.determine_rationale
     
-    event(:rationale_assigned, {
+    event!(:rationale_assigned, {
       'question' => rationale,
       'username' => stu.username
     })
