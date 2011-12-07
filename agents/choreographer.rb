@@ -46,12 +46,30 @@ class Choreographer < Sail::Agent
     #   log "#{rx} =~ #{from} --> #{from =~ rx}"
     # end
     
+    event :test_student_method? do |stanza, data|
+      username = data['payload']['username']
+      method = data['payload']['method']
+      args = data['payload']['args']
+      log "testing method #{method}"
+      begin
+        stu = lookup_student(username)
+        if args.nil? || args.empty?
+          result = stu.send(method)
+        else
+          result = stu.send(method, *args)
+        end
+        log "#{method}: #{result.inspect}", :DEBUG
+      rescue => e
+        log "#{method}: #{e}", :ERROR
+        raise e
+      end
+    end
+    
     event :check_in? do |stanza, data|
       username = data['origin']
       location = data['payload']['location']
       
-      stu = lookup_student(username)
-      stu.check_in!(location)
+      lookup_student(username).check_in!(location)
     end
     
     # event :organisms_assignment? do |stanza, data|
@@ -99,13 +117,18 @@ class Choreographer < Sail::Agent
       
       guess = data['payload']
       guess['timestamp'] = data['timestamp']
+      guess['author'] = username
       guess['username'] = username
       
       stu = lookup_student(username)
+      stu.rainforest_guess_submitted!(guess)
       
       stu.group_members.each do |m|
-        stu2 = lookup_student(m.account.login)
-        stu2.rainforest_guess_submitted!(guess)
+        unless m.account.login == username
+          guess['username'] = m.account.login
+          stu2 = lookup_student(m.account.login)
+          stu2.rainforest_guess_submitted!(guess)
+        end
       end
     end
     
@@ -140,8 +163,9 @@ class Choreographer < Sail::Agent
     
     event :rationale_assigned? do |stanza, data|
       username = data['origin']
+      rationale = data['origin']['question']
       
-      lookup_student(username).rationale_assigned!
+      lookup_student(username).rationale_assigned!(rationale)
     end
     
     event :rationale_submitted? do |stanza, data|
@@ -154,25 +178,6 @@ class Choreographer < Sail::Agent
       username = data['origin']
       
       lookup_student(username).final_guess_submitted!
-    end
-    
-    event :test_student_method? do |stanza, data|
-      username = data['payload']['username']
-      method = data['payload']['method']
-      args = data['payload']['args']
-      
-      begin
-        stu = lookup_student(username)
-        if args.nil? || args.empty?
-          result = stu.send(method)
-        else
-          result = stu.send(method, *args)
-        end
-        log "#{method}: #{result.inspect}", :DEBUG
-      rescue => e
-        log "#{method}: #{e}", :ERROR
-        raise e
-      end
     end
   end
   
