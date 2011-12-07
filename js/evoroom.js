@@ -128,7 +128,7 @@ var EvoRoom = {
                 if (ev.payload.task && ev.payload.username === Sail.app.session.account.login) {
                     Sail.app.hidePageElements();
                     // clear all fields
-                    $('#rotation-note-taker .rainforest-explanation-text-entry').text('');
+                    $('#rotation-note-taker .rainforest-explanation-text-entry').val('');
                     $('input:radio').prop('checked', false);
                     $('#rotation-note-taker .radio').button('refresh');
 
