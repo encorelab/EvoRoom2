@@ -27,6 +27,7 @@ class Student < Rollcall::User
   end
   
   def group_code
+    raise "#{self} does not have any groups!" if !groups || groups.empty?
     groups.first.name
   end
   
@@ -89,11 +90,11 @@ class Student < Rollcall::User
     
     have_first = true
     if int_1
-      have_first = mongo.collection('interviews').find_one({:username => username, :interviewee => int_1})
+      have_first = mongo.collection('interviews').find_one({:author => username, :interviewee => int_1})
     end
     have_second = true
     if int_2
-      have_second = mongo.collection('interviews').find_one({:username => username, :interviewee => int_2})
+      have_second = mongo.collection('interviews').find_one({:author => username, :interviewee => int_2})
     end
     
     if have_first && have_second
@@ -101,8 +102,8 @@ class Student < Rollcall::User
       return true
     else
       still_left = []
-      still_left << !have_first && int_1
-      still_left << !have_second && int_2
+      still_left << int_1 if !have_first
+      still_left << int_2 if !have_second
       log "#{self} must still interview #{still_left.inspect}"
       return false
     end
@@ -126,8 +127,25 @@ class Student < Rollcall::User
   def determine_interviewees
     possible_interviewee_usernames = all_usernames_currently_in_smartroom
     
+    my_group_members = group_members
+    
     possible_interviewee_usernames -= [self.username] # remove self
-    possible_interviewee_usernames -= group_members.collect{|m| m.account.login} # remove own group members
+    possible_interviewee_usernames -= my_group_members.collect{|m| m.account.login} # remove own group members
+    
+    my_group_members_interviewees = [] 
+    my_group_members.each do |m|
+      begin
+        my_group_members_interviewees << m.metadata.interviewee_1 if m.metadata.interviewee_1
+        my_group_members_interviewees << m.metadata.interviewee_2 if m.metadata.interviewee_2
+      rescue NoMethodError
+      end
+    end
+    
+    log "#{self}'s group has already been assigned the following interviewees: #{my_group_members_interviewees.inspect}"
+    
+    if [possible_interviewee_usernames - my_group_members_interviewees].length >= 2
+      possible_interviewee_usernames -= my_group_members_interviewees
+    end
     
     log "Assigning interviewees to #{self} (selecting from users: #{possible_interviewee_usernames.inspect})..."
     
@@ -207,6 +225,7 @@ class Student < Rollcall::User
       latest = mongo.collection(:location_tracking).find_one({'latest' => true, 'username' => m.account.login})
       current_locations[m.account.login] = latest && latest['location']
     end
+    log "#{self}'s group members' current loations: #{current_locations.inspect}"
     return current_locations
   end
   
@@ -229,12 +248,12 @@ class Student < Rollcall::User
     end
     
     if not_at_my_location.empty?
-      log "#{self} has all group members at his/her assigned location. Yay!"
+      log "#{self} has all group members at their assigned location (#{at_my_location.inspect} at #{my_assigned_location.inspect}). Yay!"
+      return true
     else
       log "#{self} still waiting on #{not_at_my_location.inspect}..."
+      return false
     end
-    
-    return not_at_my_location.empty? 
   end
   
   def announce_completed_rainforests
@@ -339,32 +358,35 @@ class Student < Rollcall::User
     end
     
     state :GUESS_TASK_ASSIGNED do
+      exit do |student, guess|
+        student.clear_group_location_assignment if guess['author'] == student.username
+      end
       on :rainforest_guess_submitted do
         transition :to => :WAITING_FOR_INTERVIEWEES_ASSIGNMENT, :if => :guess_received_for_all_locations?,
           :action => :start_step_3
-        transition :to => :WAITING_FOR_LOCATION_FOR_GUESS,
-          :action => :clear_group_location_assignment
+        transition :to => :WAITING_FOR_LOCATION_FOR_GUESS
       end
     end
     
     state :WAITING_FOR_INTERVIEWEES_ASSIGNMENT do
       enter {|student| Student.agent.assign_interviewees_to_student(student) }
-      on :interviewees_assigned, :to => :INTERVIEWEES_ASSIGNED
-    end
-    
-    state :INTERVIEWEES_ASSIGNED do
-      on :interview_started, :to => :INTERVIEWING do
+      on :interviewees_assigned, :to => :INTERVIEWEES_ASSIGNED do
         action do |student, first, second|
-          student.agent.log "*** TRANSITIONING TO :INTERVIEWING ==> first: #{first.inspect}, second: #{second.inspect}"
+          student.agent.log "*** TRANSITIONING TO :INTERVIEWING ==> first: #{first.inspect}, second: #{second.inspect}", :DEBUG
           student.metadata.interviewee_1 = first
           student.metadata.interviewee_2 = second
         end
       end
     end
     
+    state :INTERVIEWEES_ASSIGNED do
+      on :interview_started, :to => :INTERVIEWING
+    end
+    
     state :INTERVIEWING do
       on :interview_submitted, :to => :WAITING_FOR_RANKINGS, :if => :interview_submitted_for_all_interviewees?
       on :interview_submitted, :to => :INTERVIEWEES_ASSIGNED # else
+      on :interview_started, :to => :INTERVIEWING # hack
     end
     
     state :WAITING_FOR_RANKINGS do
@@ -373,7 +395,11 @@ class Student < Rollcall::User
     
     state :WAITING_FOR_RATIONALE_ASSIGNMENT do
       enter {|student| Student.agent.assign_rationale(student) }
-      on :rationale_assigned, :to => :WAITING_FOR_RATIONALE_SUBMISSION
+      on :rationale_assigned, :to => :WAITING_FOR_RATIONALE_SUBMISSION do
+        action do |student, rationale|
+          student.metadata.assigned_rationale = rationale
+        end
+      end
     end
     
     state :WAITING_FOR_RATIONALE_SUBMISSION do
