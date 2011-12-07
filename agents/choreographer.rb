@@ -109,19 +109,51 @@ class Choreographer < Sail::Agent
       end
     end
     
+    event :interviewees_assigned? do |stanza, data|
+      username = data['payload']['username']
+      
+      first = data['payload']['first_interviewee']
+      second = data['payload']['second_interviewee']
+      log "handling interview assigned: first #{first.inspect} second #{second.inspect}"
+      
+      lookup_student(username).interviewees_assigned!(first, second)
+    end
+    
+    event :interview_started? do |stanza, data|
+      username = data['origin']
+      
+      lookup_student(username).interview_started!
+    end
+    
+    
     event :interview_submitted? do |stanza, data|
       username = data['origin']
       
       lookup_student(username).interview_submitted!(data['payload'])
     end
     
-    event :interviewees_assigned? do |stanza, data|
-      username = data['payload']['username']
+    event :rankings_submitted? do |stanza, data|
+      username = data['origin']
       
-      first = data['payload']['first_interviewee']
-      second = data['payload']['second_interviewee']
+      lookup_student(username).rankings_submitted!(data['payload'])
+    end
+    
+    event :rationale_assigned? do |stanza, data|
+      username = data['origin']
       
-      lookup_student(username).interviewees_assigned!(first, second)
+      lookup_student(username).rationale_assigned!
+    end
+    
+    event :rationale_submitted? do |stanza, data|
+      username = data['origin']
+      
+      lookup_student(username).rationale_submitted!
+    end
+    
+    event :final_guess_submitted? do |stanza, data|
+      username = data['origin']
+      
+      lookup_student(username).final_guess_submitted!
     end
     
     event :test_student_method? do |stanza, data|
@@ -177,7 +209,7 @@ class Choreographer < Sail::Agent
     log "Assigning tasks to group #{group_code.inspect}"
     
     group_members = fetch_group(group_code).members
-    scribe_idx = rand(group_members.length-1)
+    scribe_idx = rand(group_members.length)
     
     (0..group_members.size-1).each do |i|
       username = group_members[i].account.login
@@ -209,8 +241,13 @@ class Choreographer < Sail::Agent
     })
   end
   
-  def assign_rationale_to_student(stu)
-    raise "assign_rationale_to_student: IMPLEMENT ME"
+  def assign_rationale(stu)
+    rationale = stu.determine_rationale
+    
+    event(:rationale_assigned, {
+      'question' => rationale,
+      'username' => stu.username
+    })
   end
   
   def lookup_student(username, restoring = false)

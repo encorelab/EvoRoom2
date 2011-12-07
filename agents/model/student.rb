@@ -85,6 +85,8 @@ class Student < Rollcall::User
     rescue NoMethodError
     end
     
+    log "#{self}'s interviewees: #{int_1.inspect} and #{int_2.inspect}"
+    
     have_first = true
     if int_1
       have_first = mongo.collection('interviews').find_one({:username => username, :interviewee => int_1})
@@ -107,9 +109,18 @@ class Student < Rollcall::User
   end
   
   def all_usernames_currently_in_smartroom
-    locs = mongo.collection(:location_tracking).find({'latest' => true}).to_a
-    locs.delete_if{|loc| Time.parse(loc['timestamp']) < Time.now - 20.minutes}
-    return locs.collect{|loc| loc['username']}
+    # locs = mongo.collection(:location_tracking).find({'latest' => true}).to_a
+    # locs.delete_if{|loc| Time.parse(loc['timestamp']) > Time.now - 20.minutes}
+    # return locs.collect{|loc| loc['username']}
+    
+    
+    Rollcall::Group.site = Student.site
+    section = self.group_code[0..0] # just the letter part
+    all_evo_groups = (1..4).map{|i| "#{section}#{i}"}.map{|name| Rollcall::Group.find(name)}
+    usernames = []
+    all_evo_groups.each {|g| usernames += g.members.collect{|u| u.account.login} }
+    
+    return usernames
   end
   
   def determine_interviewees
@@ -118,16 +129,16 @@ class Student < Rollcall::User
     possible_interviewee_usernames -= [self.username] # remove self
     possible_interviewee_usernames -= group_members.collect{|m| m.account.login} # remove own group members
     
-    log "Assigning interviewees to #{self} (selecting from users: #{possible_interviewee_usernames})..."
+    log "Assigning interviewees to #{self} (selecting from users: #{possible_interviewee_usernames.inspect})..."
     
     # possible_interviewees = []
     #     possible_interviewee_usernames.each do |u|
     #       possible_interviewees << Student.find(u)
     #     end
     
-    first = possible_interviewee_usernames[rand(possible_interviewee_usernames.length - 1)]
+    first = possible_interviewee_usernames[rand(possible_interviewee_usernames.length)]
     possible_interviewee_usernames -= [first]
-    second = possible_interviewee_usernames[rand(possible_interviewee_usernames.length - 1)]
+    second = possible_interviewee_usernames[rand(possible_interviewee_usernames.length)]
     
     return [first, second]
   end
@@ -145,7 +156,7 @@ class Student < Rollcall::User
       log "Student #{username.inspect}'s group (#{group_code.inspect}) already assigned to #{location.inspect}; sending student there..."
     else
       remaining = Student::RAINFORESTS - rainforests_that_the_user_has_submitted_a_guess_for
-      location = remaining[rand(remaining.length-1)]
+      location = remaining[rand(remaining.length)]
       
       log "Assigning #{location.inspect} to #{username.inspect} (#{group_code.inspect}); remaining locations: #{remaining.inspect}"
       
@@ -155,9 +166,22 @@ class Student < Rollcall::User
     return location
   end
   
+  def determine_rationale
+    members_usernames = group_members.collect{|m| m.account.login}
+    possible_rationales = ["strategy", "evidence", "additional_info"]
+    
+    rationale_idx = nil
+    (0..members_usernames.length).each do |i|
+      rationale_idx = i if self.username == members_usernames[i]
+      # blah
+    end
+    
+    return possible_rationales[rationale_idx]
+  end
+  
   def store_organism_presence(presence)
     #metadata.send("#{presence['location']_checked_for_presence}=", true)
-    agent.log "Storing presence: #{presence.inspect}"
+    log "Storing presence: #{presence.inspect}"
     mongo.collection(:organism_presence).save(presence)
   end
   
@@ -193,7 +217,10 @@ class Student < Rollcall::User
     at_my_location = []
     not_at_my_location = []
     
-    group_members_current_locations.each do |username, location| 
+    # HACK ALERT!
+    curr_locs = group_members_current_locations
+    curr_locs[self.username] = metadata.currently_assigned_location
+    curr_locs.each do |username, location| 
       if location == my_assigned_location
         at_my_location << username
       else
@@ -230,7 +257,7 @@ class Student < Rollcall::User
   def group_location_assignment
     group = self.evoroom_group
     begin
-      group.metadata.assigned_location_for_guess
+      !group.metadata.assigned_location_for_guess.blank? && group.metadata.assigned_location_for_guess
     rescue NoMethodError # FIXME: shouldn't throw this if metadata is missing
       nil
     end
@@ -239,12 +266,14 @@ class Student < Rollcall::User
   def group_location_assignment=(location)
     group = self.evoroom_group
     group.metadata.assigned_location_for_guess = location
+    log "Setting group location for #{self} to #{location.inspect}"
     group.save
   end
   
   def clear_group_location_assignment
     group = self.evoroom_group
     group.metadata.assigned_location_for_guess = nil
+    log "Clearing group location for #{self}"
     group.save
   end
   
@@ -326,6 +355,7 @@ class Student < Rollcall::User
     state :INTERVIEWEES_ASSIGNED do
       on :interview_started, :to => :INTERVIEWING do
         action do |student, first, second|
+          student.agent.log "*** TRANSITIONING TO :INTERVIEWING ==> first: #{first.inspect}, second: #{second.inspect}"
           student.metadata.interviewee_1 = first
           student.metadata.interviewee_2 = second
         end
@@ -342,7 +372,7 @@ class Student < Rollcall::User
     end
     
     state :WAITING_FOR_RATIONALE_ASSIGNMENT do
-      enter {|student| Student.agent.assign_rationale_to_student(student) }
+      enter {|student| Student.agent.assign_rationale(student) }
       on :rationale_assigned, :to => :WAITING_FOR_RATIONALE_SUBMISSION
     end
     
