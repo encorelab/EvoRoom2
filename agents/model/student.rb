@@ -258,7 +258,7 @@ class Student < Rollcall::User
   
   def announce_completed_rainforests
     completed_rainforests = mongo.collection(:organism_presence).find('username' => username).
-      to_a.collect{|p| p['location']}.uniq
+      to_a.collect{|p| p['location']}.uniq.select{|r| r =~ /rainforest/}
     
     log "#{self} has submitted a presence observation for: #{completed_rainforests.inspect}"
     
