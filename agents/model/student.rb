@@ -88,15 +88,15 @@ class Student < Rollcall::User
     
     log "#{self}'s interviewees: #{int_1.inspect} and #{int_2.inspect}"
     
-    have_first = true
     if int_1
-      have_first = mongo.collection('interviews').find_one({:author => username, :interviewee => int_1})
-    end
-    have_second = true
-    if int_2
-      have_second = mongo.collection('interviews').find_one({:author => username, :interviewee => int_2})
+      have_first = mongo.collection(:interviews).find({:author => username, :interviewee => int_1}).count > 0
     end
     
+    if int_2
+      have_second = mongo.collection(:interviews).find({:author => username, :interviewee => int_2}).count > 0
+    end
+    
+    log "#{self} --> have_first => #{have_first} & have_second => #{have_second}"
     if have_first && have_second
       log "#{self} has completed all required interviews"
       return true
