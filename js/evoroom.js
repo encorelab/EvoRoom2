@@ -663,10 +663,24 @@ var EvoRoom = {
             } else {
                 $('#rotation-field-guide-and-prediction').show();
             }
-        } else if (Sail.app.user_metadata.state === 'INTERVIEWEES_ASSIGNED') {
+        } else if (Sail.app.user_metadata.state === 'INTERVIEWEES_ASSIGNED' || Sail.app.user_metadata.state === 'INTERVIEWING') {
             $('#interview-intro .first-interviewee').text(Sail.app.user_metadata.interviewee_1);
             $('#interview-intro .second-interviewee').text(Sail.app.user_metadata.interviewee_2);
             $('#interview-intro').show();
+        } else if (Sail.app.user_metadata.state === 'WAITING_FOR_RANKINGS') {
+            $('#final-picks-ranking').show();
+        } else if (Sail.app.user_metadata.state === 'WAITING_FOR_RATIONALE_SUBMISSION') {
+            Sail.app.rationaleAssigned = Sail.app.user_metadata.assigned_rationale;
+            if (Sail.app.user_metadata.assigned_rationale === 'strategy') {
+                $('#discussion-content-box .question1').show();
+            } else if (Sail.app.user_metadata.assigned_rationale === 'evidence') {
+                $('#discussion-content-box .question2').show();
+            } else if (Sail.app.user_metadata.assigned_rationale === 'additional_info') {
+                $('#discussion-content-box .question3').show();
+            }
+            $('#final-picks-discuss').show();
+        } else if (Sail.app.user_metadata.state === 'WAITING_FOR_FINAL_GUESS') {
+            $('final-picks-choice').show();
         }
         else {
             console.warn('restoreState: read state <'+Sail.app.user_metadata.state+ '> which is not handled currently.');
