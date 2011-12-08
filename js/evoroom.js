@@ -475,13 +475,22 @@ var EvoRoom = {
         });
         
         $('#rotation-scan-failure .small-error-resolver-button').click(function() {
-            // send out event check_in
-            Sail.app.currentRainforest = $(this).data('rainforest');
-            Sail.app.submitCheckIn();
+            var result = $(this).data('rainforest');
+            
+            console.log("Got 'fake' Barcode: " +result);
             // hide everything
             Sail.app.hidePageElements();
-            // wait
-            $('#loading-page').show();
+            // check if they are at the correct place
+            if (Sail.app.targetRainforest === result) {
+                Sail.app.currentRainforest = result;
+                Sail.app.submitCheckIn();
+                $('#loading-page').show();
+            }
+            // alert and send them back to the 5th screen
+            else {
+                alert ("You are at the wrong location, please scan again at the correct location");
+                $('#rotation-next-rainforest').show();
+            }
         });
 
         // notetaker submits whether they think this is their rainforest
@@ -648,7 +657,7 @@ var EvoRoom = {
             // show page to do rainforst QR scanning
             $('#survey-welcome').show();
         } else if (Sail.app.user_metadata.state === 'GUESS_LOCATION_ASSIGNED') {
-            //$('#rotation-intro .current-rainforest').text(Sail.app.formatRainforestString(Sail.app.user_metadata.currently_assigned_location));
+            Sail.app.targetRainforest = Sail.app.user_metadata.currently_assigned_location;
             $('#rotation-next-rainforest .next-rainforest').text(Sail.app.formatRainforestString(Sail.app.user_metadata.currently_assigned_location));
             $('#rotation-next-rainforest').show();
         } else if (Sail.app.user_metadata.state === 'AT_ASSIGNED_GUESS_LOCATION') {
