@@ -72,7 +72,7 @@ class Student < Rollcall::User
   end
   
   def interview_submitted_for_all_interviewees?(interview = nil)
-    mongo.collection('interviews').save(interview) if interview
+    mongo.collection(:interviews).save(interview) if interview
     
     int_1 = nil
     begin
@@ -384,8 +384,10 @@ class Student < Rollcall::User
     end
     
     state :INTERVIEWING do
-      on :interview_submitted, :to => :WAITING_FOR_RANKINGS, :if => :interview_submitted_for_all_interviewees?
-      on :interview_submitted, :to => :INTERVIEWEES_ASSIGNED, :if => proc {|student| !student.interview_submitted_for_all_interviewees?}
+      on :interview_submitted do
+        transition :to => :WAITING_FOR_RANKINGS, :if => :interview_submitted_for_all_interviewees?
+        transition :to => :INTERVIEWEES_ASSIGNED # else
+      end
       on :interview_started, :to => :INTERVIEWING # hack
     end
     
