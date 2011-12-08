@@ -20,8 +20,7 @@ var EvoRoom = {
             /********************************************* INCOMING EVENTS *******************************************/
             start_step: function(ev) {
                 if (ev.payload.username && ev.payload.username === Sail.app.session.account.login) {
-                    if (ev.payload.step_id) {ev
-                        
+                    if (ev.payload.step_id) {
                         if (ev.payload.step_id === "STEP_1") {
                             console.log("Received start_step for step1 - nothing done with it right now!");
                         } else if (ev.payload.step_id === "STEP_2") {
@@ -155,7 +154,7 @@ var EvoRoom = {
             },
             
             rainforest_guess_submitted: function(ev) {
-                if ((ev.payload.groupCode === Sail.app.currentGroupCode) && (ev.payload.author != Sail.app.session.account.login)) {
+                if ((ev.payload.groupCode === Sail.app.currentGroupCode) && (ev.payload.author !== Sail.app.session.account.login)) {
                     Sail.app.hidePageElements();
                     $('#loading-page').show();
                 }
@@ -649,7 +648,7 @@ var EvoRoom = {
             // show page to do rainforst QR scanning
             $('#survey-welcome').show();
         } else if (Sail.app.user_metadata.state === 'GUESS_LOCATION_ASSIGNED') {
-            $('#rotation-intro .current-rainforest').text(Sail.app.formatRainforestString(Sail.app.user_metadata.currently_assigned_location));
+            //$('#rotation-intro .current-rainforest').text(Sail.app.formatRainforestString(Sail.app.user_metadata.currently_assigned_location));
             $('#rotation-next-rainforest .next-rainforest').text(Sail.app.formatRainforestString(Sail.app.user_metadata.currently_assigned_location));
             $('#rotation-next-rainforest').show();
         } else if (Sail.app.user_metadata.state === 'AT_ASSIGNED_GUESS_LOCATION') {
@@ -913,8 +912,10 @@ var EvoRoom = {
         } else if (rainforestString === "rainforest_d") {
             return "Rainforest D";
         } else if (rainforestString === "room") {
-            alert("An error has occured. Please talk to a teacher"
+            console.warn('Rainforest ' + rainforestString + ' is wrong at this point. Inform user with alert!');
+            alert("An error has occured. Please talk to a teacher");
         } else {
+            console.warn('Rainforest ' + rainforestString + ' is wrong at this point and we return <unknown rainforest>');
             return "unknown rainforest";
         }
     },
