@@ -680,7 +680,7 @@ var EvoRoom = {
             }
             $('#final-picks-discuss').show();
         } else if (Sail.app.user_metadata.state === 'WAITING_FOR_FINAL_GUESS') {
-            $('final-picks-choice').show();
+            $('#final-picks-choice').show();
         }
         else {
             console.warn('restoreState: read state <'+Sail.app.user_metadata.state+ '> which is not handled currently.');

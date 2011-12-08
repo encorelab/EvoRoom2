@@ -88,15 +88,15 @@ class Student < Rollcall::User
     
     log "#{self}'s interviewees: #{int_1.inspect} and #{int_2.inspect}"
     
-    have_first = true
     if int_1
-      have_first = mongo.collection('interviews').find_one({:author => username, :interviewee => int_1})
-    end
-    have_second = true
-    if int_2
-      have_second = mongo.collection('interviews').find_one({:author => username, :interviewee => int_2})
+      have_first = mongo.collection(:interviews).find({:author => username, :interviewee => int_1}).count > 0
     end
     
+    if int_2
+      have_second = mongo.collection(:interviews).find({:author => username, :interviewee => int_2}).count > 0
+    end
+    
+    log "#{self} --> have_first => #{have_first} & have_second => #{have_second}"
     if have_first && have_second
       log "#{self} has completed all required interviews"
       return true
@@ -240,7 +240,7 @@ class Student < Rollcall::User
     curr_locs = group_members_current_locations
     curr_locs[self.username] = metadata.currently_assigned_location
     curr_locs.each do |username, location| 
-      if location == my_assigned_location
+      if location == my_assigned_location && agent.lookup_student(username).state == self.state
         at_my_location << username
       else
         not_at_my_location << username
@@ -258,7 +258,7 @@ class Student < Rollcall::User
   
   def announce_completed_rainforests
     completed_rainforests = mongo.collection(:organism_presence).find('username' => username).
-      to_a.collect{|p| p['location']}.uniq
+      to_a.collect{|p| p['location']}.uniq.select{|r| r =~ /rainforest/}
     
     log "#{self} has submitted a presence observation for: #{completed_rainforests.inspect}"
     
@@ -359,7 +359,7 @@ class Student < Rollcall::User
     
     state :GUESS_TASK_ASSIGNED do
       exit do |student, guess|
-        student.clear_group_location_assignment if guess['author'] == student.username
+        student.clear_group_location_assignment if guess && guess['author'] == student.username
       end
       on :rainforest_guess_submitted do
         transition :to => :WAITING_FOR_INTERVIEWEES_ASSIGNMENT, :if => :guess_received_for_all_locations?,
@@ -385,7 +385,7 @@ class Student < Rollcall::User
     
     state :INTERVIEWING do
       on :interview_submitted, :to => :WAITING_FOR_RANKINGS, :if => :interview_submitted_for_all_interviewees?
-      on :interview_submitted, :to => :INTERVIEWEES_ASSIGNED # else
+      on :interview_submitted, :to => :INTERVIEWEES_ASSIGNED, :if => proc {|student| !student.interview_submitted_for_all_interviewees?}
       on :interview_started, :to => :INTERVIEWING # hack
     end
     
@@ -407,7 +407,7 @@ class Student < Rollcall::User
     end
     
     state :WAITING_FOR_FINAL_GUESS do
-      on :final_guess_submitted, :to => :DONE
+      on :check_in, :to => :DONE
     end
   end
 end
