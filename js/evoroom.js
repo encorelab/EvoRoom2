@@ -894,7 +894,8 @@ var EvoRoom = {
                             $('#group-notes .notes.'+x).text(data.results[x-1].payload.notes);
                         }
                         else {
-                            data.results[x-1].payload.notes.text('');
+                            //data.results[x-1].payload.notes.text('');
+                            $('#group-notes .notes.'+x).text('');
                         }
                     }
                 }
@@ -911,6 +912,8 @@ var EvoRoom = {
             return "Rainforest C";
         } else if (rainforestString === "rainforest_d") {
             return "Rainforest D";
+        } else if (rainforestString === "room") {
+            alert("An error has occured. Please talk to a teacher"
         } else {
             return "unknown rainforest";
         }
