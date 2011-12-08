@@ -20,8 +20,7 @@ var EvoRoom = {
             /********************************************* INCOMING EVENTS *******************************************/
             start_step: function(ev) {
                 if (ev.payload.username && ev.payload.username === Sail.app.session.account.login) {
-                    if (ev.payload.step_id) {ev
-                        
+                    if (ev.payload.step_id) {
                         if (ev.payload.step_id === "STEP_1") {
                             console.log("Received start_step for step1 - nothing done with it right now!");
                         } else if (ev.payload.step_id === "STEP_2") {
@@ -155,7 +154,7 @@ var EvoRoom = {
             },
             
             rainforest_guess_submitted: function(ev) {
-                if ((ev.payload.groupCode === Sail.app.currentGroupCode) && (ev.payload.author != Sail.app.session.account.login)) {
+                if ((ev.payload.groupCode === Sail.app.currentGroupCode) && (ev.payload.author !== Sail.app.session.account.login)) {
                     Sail.app.hidePageElements();
                     $('#loading-page').show();
                 }
@@ -476,13 +475,22 @@ var EvoRoom = {
         });
         
         $('#rotation-scan-failure .small-error-resolver-button').click(function() {
-            // send out event check_in
-            Sail.app.currentRainforest = $(this).data('rainforest');
-            Sail.app.submitCheckIn();
+            var result = $(this).data('rainforest');
+            
+            console.log("Got 'fake' Barcode: " +result);
             // hide everything
             Sail.app.hidePageElements();
-            // wait
-            $('#loading-page').show();
+            // check if they are at the correct place
+            if (Sail.app.targetRainforest === result) {
+                Sail.app.currentRainforest = result;
+                Sail.app.submitCheckIn();
+                $('#loading-page').show();
+            }
+            // alert and send them back to the 5th screen
+            else {
+                alert ("You are at the wrong location, please scan again at the correct location");
+                $('#rotation-next-rainforest').show();
+            }
         });
 
         // notetaker submits whether they think this is their rainforest
@@ -649,7 +657,7 @@ var EvoRoom = {
             // show page to do rainforst QR scanning
             $('#survey-welcome').show();
         } else if (Sail.app.user_metadata.state === 'GUESS_LOCATION_ASSIGNED') {
-            $('#rotation-intro .current-rainforest').text(Sail.app.formatRainforestString(Sail.app.user_metadata.currently_assigned_location));
+            Sail.app.targetRainforest = Sail.app.user_metadata.currently_assigned_location;
             $('#rotation-next-rainforest .next-rainforest').text(Sail.app.formatRainforestString(Sail.app.user_metadata.currently_assigned_location));
             $('#rotation-next-rainforest').show();
         } else if (Sail.app.user_metadata.state === 'AT_ASSIGNED_GUESS_LOCATION') {
@@ -894,7 +902,8 @@ var EvoRoom = {
                             $('#group-notes .notes.'+x).text(data.results[x-1].payload.notes);
                         }
                         else {
-                            data.results[x-1].payload.notes.text('');
+                            //data.results[x-1].payload.notes.text('');
+                            $('#group-notes .notes.'+x).text('');
                         }
                     }
                 }
@@ -911,7 +920,11 @@ var EvoRoom = {
             return "Rainforest C";
         } else if (rainforestString === "rainforest_d") {
             return "Rainforest D";
+        } else if (rainforestString === "room") {
+            console.warn('Rainforest ' + rainforestString + ' is wrong at this point. Inform user with alert!');
+            alert("An error has occured. Please talk to a teacher");
         } else {
+            console.warn('Rainforest ' + rainforestString + ' is wrong at this point and we return <unknown rainforest>');
             return "unknown rainforest";
         }
     },
